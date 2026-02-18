@@ -235,7 +235,7 @@
 
 
 
-/* Video modal centrado */
+/* Video modal centrado (no afecta lo demás) */
 .videoOverlay{
   position:fixed; inset:0; z-index:9999;
   background:rgba(0,0,0,.62);
@@ -367,7 +367,7 @@ footer{
   background: var(--glass-strong) !important;
 }
 
-/* Video modal centrado */
+/* Video modal centrado (no afecta lo demás) */
 .videoOverlay{
   position:fixed; inset:0; z-index:9999;
   background:rgba(0,0,0,.62);
@@ -1170,10 +1170,8 @@ footer{
       try{ videoEl.load(); }catch(e){}
 
       videoBtn.onclick = () => {
-        // abre en modal centrado
+        // abre modal centrado (mute + loop)
         openVideoModal(videoEl.src);
-        // mantenemos wrap oculto para evitar scroll
-        videoWrap.style.display = \"none\";
       };
     } else {
       videoBtn.style.display = "none";
@@ -1192,35 +1190,6 @@ footer{
     overlay.setAttribute("aria-hidden","true");
     const videoEl = document.getElementById("cVideo");
     try{ videoEl.pause(); }catch(e){}
-
-  function openVideoModal(src){
-    const overlay = document.getElementById("videoOverlay");
-    const v = document.getElementById("videoModalEl");
-    if (!overlay || !v || !src) return;
-
-    v.src = src;
-    v.muted = true;
-    v.loop = true;
-    v.playsInline = true;
-
-    overlay.style.display = "flex";
-    overlay.setAttribute("aria-hidden","false");
-
-    try{ v.play(); }catch(e){}
-  }
-
-  function closeVideoModal(){
-    const overlay = document.getElementById("videoOverlay");
-    const v = document.getElementById("videoModalEl");
-    if (!overlay || !v) return;
-
-    try{ v.pause(); v.currentTime = 0; }catch(e){}
-    v.removeAttribute("src");
-    v.load();
-
-    overlay.style.display = "none";
-    overlay.setAttribute("aria-hidden","true");
-  }
   }
 
 
@@ -1358,11 +1327,41 @@ footer{
   loadCatalog();
 
 
+  // --- Video Modal (centrado, mute + loop, cierra con click afuera) ---
+  function openVideoModal(src){
+    const overlay = document.getElementById("videoOverlay");
+    const v = document.getElementById("videoModalEl");
+    if (!overlay || !v || !src) return;
+
+    v.src = src;
+    v.muted = true;
+    v.loop = true;
+    v.playsInline = true;
+
+    overlay.style.display = "flex";
+    overlay.setAttribute("aria-hidden","false");
+
+    try{ v.play(); }catch(e){}
+  }
+
+  function closeVideoModal(){
+    const overlay = document.getElementById("videoOverlay");
+    const v = document.getElementById("videoModalEl");
+    if (!overlay || !v) return;
+
+    try{ v.pause(); v.currentTime = 0; }catch(e){}
+    v.removeAttribute("src");
+    v.load();
+
+    overlay.style.display = "none";
+    overlay.setAttribute("aria-hidden","true");
+  }
+
   (function initVideoModal(){
     const overlay = document.getElementById("videoOverlay");
     if (!overlay) return;
     overlay.addEventListener("click", (e) => {
-      if (e.target === overlay) closeVideoModal();
+      if (e.target === overlay) closeVideoModal(); // solo afuera
     });
   })();
 
