@@ -1,0 +1,1261 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Krystal Grand · Catálogo de Habitaciones (Vistas)</title>
+  <style>
+    :root{
+      --bg:#0b0f14;--card:#121a22;--line:#243243;--txt:#e9eef5;--muted:#a9b6c7;
+      --shadow:0 18px 50px rgba(0,0,0,.55);
+    }
+    html,body{width:100%;max-width:100%;margin:0;overflow-x:hidden}
+    *{box-sizing:border-box}
+    body{
+      margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;
+      background:var(--bg);color:var(--txt);
+      position:relative; overflow-x:hidden;
+    }
+    /* Fondo metálico premium (mismo look) */
+    body::before {
+      content:""; position:fixed; inset:0;
+      background:
+        radial-gradient(1200px 800px at 15% 10%, rgba(110,231,255,.10), transparent 55%),
+        radial-gradient(1200px 800px at 85% 20%, rgba(139,92,246,.08), transparent 55%),
+        radial-gradient(1000px 700px at 50% 85%, rgba(44,255,154,.06), transparent 55%);
+      opacity:.08; pointer-events:none; z-index:-2;
+    }
+    body::after {
+      content:""; position:fixed; inset:0;
+      background: radial-gradient(circle at top center, rgba(0,0,0,0.25), rgba(0,0,0,0.65) 60%, rgba(0,0,0,0.9));
+      pointer-events:none; z-index:-1;
+    }
+
+    header{
+      position:sticky;top:0;z-index:10;
+      background:rgba(11,15,20,.95);backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--line);
+    }
+    .wrap{width:100%;max-width:min(1920px,100%);margin:0 auto;padding:12px clamp(12px,2vw,28px)}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+    .centerTitle{text-align:center;flex:1;min-width:240px}
+    .centerTitle .h1{font-size:22px;font-weight:900;letter-spacing:.5px}
+    .muted{color:var(--muted);font-size:12px;line-height:1.4}
+
+    main{width:100%;max-width:min(1920px,100%);margin:0 auto;padding:14px clamp(12px,2vw,28px)}
+
+    .grid{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:10px;overflow:hidden}
+    .leftScroll{height:calc(100vh - 86px);overflow:auto;padding:10px}
+    @media (max-width: 980px){ .leftScroll{height:auto} }
+
+    .towerBlock{
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:linear-gradient(180deg, rgba(18,26,34,.92), rgba(15,23,32,.92));
+      padding:14px;
+      box-shadow: 0 18px 40px rgba(0,0,0,.28);
+    }
+    .towerTitle{font-weight:900;font-size:15px;letter-spacing:.2px;margin:0 0 2px 0}
+    .towerSep{
+      height:18px;border-radius:16px;margin:14px 0;
+      background:linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent);
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.22);
+    }
+    .divider{height:1px;background:var(--line);margin:12px 0}
+
+    .floor{border:1px solid var(--line);border-radius:14px;background:#0f1720;padding:10px;margin-bottom:10px}
+    .floorHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+    .floorHead b{font-size:13px}
+
+    /* Botones (sin acción) */
+    .floorRow{display:grid;gap:8px;grid-template-columns:repeat(auto-fit, minmax(78px, 1fr))}
+    .tile{
+      border:1px solid var(--line);border-radius:12px;background:#0b1119;color:var(--txt);
+      padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:6px;
+      user-select:none; cursor:default;
+    }
+    .tile:focus{outline:2px solid rgba(233,238,245,.35); outline-offset:2px}
+    .numText{font-size:14px;font-weight:900;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+
+    footer{
+      margin-top:26px;
+      padding:30px 20px;
+      text-align:center;
+      font-size:14px;
+      letter-spacing:0.5px;
+      color:rgba(255,255,255,0.65);
+      border-top:1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(4px);
+    }
+  
+/* === Catálogo: estados de carga === */
+.tile{
+  position:relative;
+  transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease, filter .14s ease;
+}
+.tile.pending .numText{opacity:.85;}
+.tile.pending .loadingDot{
+  position:absolute; right:10px; bottom:10px;
+  width:32px; height:32px; border-radius:12px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(10,14,20,.40);
+  display:grid; place-items:center; overflow:hidden;
+}
+.tile.pending .loadingDot img{
+  width:28px; height:28px; object-fit:contain; opacity:.95;
+}
+
+/* Verde aperlado metálico (cargada) */
+.tile.loaded{
+  border-color: rgba(95,255,20,.32) !important;
+  box-shadow: 0 10px 26px rgba(95,255,20,.12);
+  background:
+    radial-gradient(900px 400px at 20% 10%, rgba(95,255,20,.18), transparent 58%),
+    linear-gradient(135deg, rgba(95,255,20,.14), rgba(10,14,20,.20)),
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.00));
+}
+.tile.loaded::after{
+  content:"";
+  position:absolute; inset:0;
+  border-radius: 16px;
+  pointer-events:none;
+  background: linear-gradient(120deg,
+    rgba(255,255,255,.00) 0%,
+    rgba(255,255,255,.10) 22%,
+    rgba(255,255,255,.00) 46%);
+  opacity:.55;
+  mix-blend-mode: overlay;
+}
+.tile.loaded:hover{
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  border-color: rgba(95,255,20,.55) !important;
+}
+.tile.loaded .okMark{
+  position:absolute; left:10px; bottom:10px;
+  padding:6px 8px; border-radius:999px;
+  border:1px solid rgba(95,255,20,.30);
+  background: rgba(10,14,20,.35);
+  color: rgba(215,255,226,.98);
+  font-size:11px;
+  letter-spacing:.2px;
+  display:flex; align-items:center; gap:6px;
+}
+
+/* Modal grande (ficha) */
+.catalogOverlay{
+  position:fixed; inset:0;
+  background: rgba(0,0,0,.62);
+  display:none;
+  align-items:center; justify-content:center;
+  padding:18px;
+  z-index: 9999;
+}
+.catalogModal{
+  width:min(1060px, 100%);
+  border-radius: 24px;
+  overflow:hidden;
+  background: linear-gradient(180deg, rgba(18,28,40,.96), rgba(15,22,32,.92));
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow: 0 26px 70px rgba(0,0,0,.65);
+}
+.catalogTop{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 16px 12px 16px;
+  border-bottom:1px solid rgba(255,255,255,.07);
+  gap:10px;
+}
+.catalogTop h2{margin:0; font-size:16px}
+.catalogClose{
+  width:40px; height:40px; border-radius:14px;
+  display:grid; place-items:center;
+  cursor:pointer; user-select:none;
+  background: rgba(10,14,20,.45);
+  border:1px solid rgba(255,255,255,.10);
+}
+.catalogBody{display:grid; grid-template-columns: 1.3fr .7fr; gap:0;}
+.catalogGallery{padding:14px; border-right:1px solid rgba(255,255,255,.07);}
+.catalogHero{
+  border-radius:18px; overflow:hidden;
+  height:360px;
+  background:#0b1018;
+  border:1px solid rgba(255,255,255,.08);
+}
+.catalogHero img{width:100%; height:100%; object-fit:cover}
+.catalogThumbs{margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;}
+.catalogThumb{
+  width:104px; height:70px;
+  border-radius:14px; overflow:hidden;
+  background:#0b1018;
+  border:1px solid rgba(255,255,255,.10);
+  cursor:pointer; opacity:.92;
+}
+.catalogThumb:hover{opacity:1}
+.catalogThumb img{width:100%; height:100%; object-fit:cover}
+.catalogSide{padding:14px;}
+.catalogSub{margin:0; color:rgba(255,255,255,.72); font-size:12px; line-height:1.35;}
+.catalogKV{display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;}
+.catalogKV .box{
+  padding:10px 12px;
+  border-radius:16px;
+  background: rgba(21,34,51,.55);
+  border:1px solid rgba(255,255,255,.08);
+  color: rgba(255,255,255,.72);
+  font-size:12px;
+}
+.catalogKV .box b{display:block; color:rgba(235,245,255,.95); margin-bottom:2px; font-size:12px}
+.catalogList{
+  margin-top:12px;
+  padding:12px;
+  border-radius:16px;
+  background: rgba(21,34,51,.55);
+  border:1px solid rgba(255,255,255,.08);
+}
+.catalogList h4{margin:0 0 8px; font-size:13px}
+.catalogList ul{margin:0; padding-left:18px; color:rgba(255,255,255,.72); font-size:12px; line-height:1.5}
+.videoBtn{
+  margin-top:10px;
+  display:flex; gap:10px; align-items:center; justify-content:center;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid rgba(110,231,255,.20);
+  background: rgba(10,14,20,.35);
+  cursor:pointer;
+}
+.videoBtn:hover{border-color: rgba(110,231,255,.38);}
+.videoWrap{margin-top:12px; display:none;}
+.videoWrap video{width:100%; border-radius:16px; border:1px solid rgba(255,255,255,.10);}
+
+@media (max-width: 980px){
+  .catalogBody{grid-template-columns: 1fr;}
+  .catalogGallery{border-right:0; border-bottom:1px solid rgba(255,255,255,.07);}
+  .catalogHero{height:280px;}
+}
+
+
+</style>
+
+
+<style>
+/* === PRO LUXURY BACKDROP (watermark + vignette + film grain) === */
+:root{
+  --glass: rgba(15, 22, 32, 0.62);
+  --glass-strong: rgba(15, 22, 32, 0.74);
+  --border: rgba(255,255,255,.10);
+  --border2: rgba(110,231,255,.16);
+}
+
+/* Backdrop layers sit behind everything */
+.bg-stage{
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Subtle vignette to frame content */
+.bg-stage::before{
+  content:"";
+  position:absolute; inset:-2px;
+  background:
+    radial-gradient(1200px 900px at 50% 35%, rgba(110,231,255,.10), transparent 55%),
+    radial-gradient(1200px 900px at 85% 15%, rgba(139,92,246,.08), transparent 58%),
+    radial-gradient(1000px 800px at 15% 85%, rgba(44,255,154,.06), transparent 58%),
+    radial-gradient(1300px 900px at 50% 55%, transparent 35%, rgba(0,0,0,.62) 85%);
+}
+
+/* Film grain (super light) */
+.bg-stage::after{
+  content:"";
+  position:absolute; inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E");
+  opacity: .07;
+  mix-blend-mode: overlay;
+}
+
+/* Watermark logo centered, never blocked */
+.bg-watermark{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.bg-watermark img{
+  width: min(980px, 78vw);
+  opacity: 0.055; /* ultra subtle */
+  filter: grayscale(100%) contrast(1.1) brightness(1.55);
+  mix-blend-mode: soft-light; /* luxury look */
+  transform: translateY(-10px) scale(1.03);
+}
+
+/* Content sits above backdrop */
+.content-layer{ position: relative; z-index: 2; }
+
+/* Glass containers: transparent + border glow */
+.topbar, .wrap > .grid, .wrap > .tableWrap, footer{
+  background: var(--glass) !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  backdrop-filter: blur(14px);
+}
+
+/* Give topbar a premium border accent */
+.topbar{
+  box-shadow: 0 18px 55px rgba(0,0,0,.55);
+  position: sticky;
+}
+.topbar::after{
+  content:"";
+  position:absolute; inset:0;
+  border-radius: var(--radius2);
+  pointer-events:none;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06), inset 0 0 0 2px rgba(110,231,255,.06);
+  mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
+  -webkit-mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
+  padding: 0px;
+}
+
+/* Cards: slightly more glass */
+.card{
+  background: linear-gradient(180deg, rgba(18,28,40,.70), rgba(15,22,32,.56)) !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+}
+.card:hover{
+  border-color: rgba(110,231,255,.24) !important;
+}
+
+/* Buttons: sharper */
+.btn{
+  border-color: rgba(255,255,255,.14) !important;
+}
+.btn:hover{
+  border-color: rgba(110,231,255,.42) !important;
+}
+
+/* Footer subtle */
+footer{
+  background: var(--glass-strong) !important;
+}
+</style>
+
+</head>
+<body>
+<div class="bg-stage">
+  <div class="bg-watermark">
+    <img src="https://res.cloudinary.com/dor6za85u/image/upload/v1765651460/Krystal_Grand_wo1rbs.jpg" alt="Krystal Grand">
+  </div>
+</div>
+<div class='content-layer'>
+
+<header>
+  <div class="wrap">
+    <div class="top">
+      <!-- Logo izquierda -->
+      <div style="display:flex;align-items:center;gap:12px;min-width:140px">
+        <img src="https://res.cloudinary.com/dor6za85u/image/upload/v1765651460/Krystal_Grand_wo1rbs.jpg"
+             alt="Krystal Grand"
+             style="height:48px;border-radius:10px;border:1px solid rgba(255,255,255,.10)">
+      </div>
+
+      <!-- Título centro -->
+      <div class="centerTitle">
+        <div class="h1">Catálogo de Habitaciones · Vistas</div>
+        <div class="muted" style="margin-top:4px;font-size:12px">
+          Consulta rápida por torre y piso · Si una habitación ya tiene ficha, se muestra en pantalla
+        </div>
+      </div>
+
+      <!-- Reloj derecha -->
+      <div style="text-align:right;min-width:160px">
+        <div id="clock" style="font-size:20px;font-weight:900;letter-spacing:.3px"></div>
+        <div id="date" class="muted" style="font-size:13px;margin-top:4px"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="grid">
+    <div class="leftScroll">
+      
+    <section class="towerBlock">
+      <div class="towerTitle">Altitude</div>
+      <div class="muted">Pisos 27 al 22 (10 hab) · Piso 21 (08→01)</div>
+      <div class="divider"></div>
+      
+    <div class="floor">
+      <div class="floorHead">
+        <b>Piso 27</b>
+        <span class="muted">10 hab.</span>
+      </div>
+      <div class="floorRow">
+        <button class="tile" type="button" data-room="2710" aria-label="Habitación 2710"><div class="numText">2710</div></button>
+<button class="tile" type="button" data-room="2709" aria-label="Habitación 2709"><div class="numText">2709</div></button>
+<button class="tile" type="button" data-room="2708" aria-label="Habitación 2708"><div class="numText">2708</div></button>
+<button class="tile" type="button" data-room="2707" aria-label="Habitación 2707"><div class="numText">2707</div></button>
+<button class="tile" type="button" data-room="2706" aria-label="Habitación 2706"><div class="numText">2706</div></button>
+<button class="tile" type="button" data-room="2705" aria-label="Habitación 2705"><div class="numText">2705</div></button>
+<button class="tile" type="button" data-room="2704" aria-label="Habitación 2704"><div class="numText">2704</div></button>
+<button class="tile" type="button" data-room="2703" aria-label="Habitación 2703"><div class="numText">2703</div></button>
+<button class="tile" type="button" data-room="2702" aria-label="Habitación 2702"><div class="numText">2702</div></button>
+<button class="tile" type="button" data-room="2701" aria-label="Habitación 2701"><div class="numText">2701</div></button>
+      </div>
+    </div>
+    
+    <div class="floor">
+      <div class="floorHead">
+        <b>Piso 26</b>
+        <span class="muted">10 hab.</span>
+      </div>
+      <div class="floorRow">
+        <button class="tile" type="button" data-room="2610" aria-label="Habitación 2610"><div class="numText">2610</div></button>
+<button class="tile" type="button" data-room="2609" aria-label="Habitación 2609"><div class="numText">2609</div></button>
+<button class="tile" type="button" data-room="2608" aria-label="Habitación 2608"><div class="numText">2608</div></button>
+<button class="tile" type="button" data-room="2607" aria-label="Habitación 2607"><div class="numText">2607</div></button>
+<button class="tile" type="button" data-room="2606" aria-label="Habitación 2606"><div class="numText">2606</div></button>
+<button class="tile" type="button" data-room="2605" aria-label="Habitación 2605"><div class="numText">2605</div></button>
+<button class="tile" type="button" data-room="2604" aria-label="Habitación 2604"><div class="numText">2604</div></button>
+<button class="tile" type="button" data-room="2603" aria-label="Habitación 2603"><div class="numText">2603</div></button>
+<button class="tile" type="button" data-room="2602" aria-label="Habitación 2602"><div class="numText">2602</div></button>
+<button class="tile" type="button" data-room="2601" aria-label="Habitación 2601"><div class="numText">2601</div></button>
+      </div>
+    </div>
+    
+    <div class="floor">
+      <div class="floorHead">
+        <b>Piso 25</b>
+        <span class="muted">10 hab.</span>
+      </div>
+      <div class="floorRow">
+        <button class="tile" type="button" data-room="2510" aria-label="Habitación 2510"><div class="numText">2510</div></button>
+<button class="tile" type="button" data-room="2509" aria-label="Habitación 2509"><div class="numText">2509</div></button>
+<button class="tile" type="button" data-room="2508" aria-label="Habitación 2508"><div class="numText">2508</div></button>
+<button class="tile" type="button" data-room="2507" aria-label="Habitación 2507"><div class="numText">2507</div></button>
+<button class="tile" type="button" data-room="2506" aria-label="Habitación 2506"><div class="numText">2506</div></button>
+<button class="tile" type="button" data-room="2505" aria-label="Habitación 2505"><div class="numText">2505</div></button>
+<button class="tile" type="button" data-room="2504" aria-label="Habitación 2504"><div class="numText">2504</div></button>
+<button class="tile" type="button" data-room="2503" aria-label="Habitación 2503"><div class="numText">2503</div></button>
+<button class="tile" type="button" data-room="2502" aria-label="Habitación 2502"><div class="numText">2502</div></button>
+<button class="tile" type="button" data-room="2501" aria-label="Habitación 2501"><div class="numText">2501</div></button>
+      </div>
+    </div>
+    
+    <div class="floor">
+      <div class="floorHead">
+        <b>Piso 24</b>
+        <span class="muted">10 hab.</span>
+      </div>
+      <div class="floorRow">
+        <button class="tile" type="button" data-room="2410" aria-label="Habitación 2410"><div class="numText">2410</div></button>
+<button class="tile" type="button" data-room="2409" aria-label="Habitación 2409"><div class="numText">2409</div></button>
+<button class="tile" type="button" data-room="2408" aria-label="Habitación 2408"><div class="numText">2408</div></button>
+<button class="tile" type="button" data-room="2407" aria-label="Habitación 2407"><div class="numText">2407</div></button>
+<button class="tile" type="button" data-room="2406" aria-label="Habitación 2406"><div class="numText">2406</div></button>
+<button class="tile" type="button" data-room="2405" aria-label="Habitación 2405"><div class="numText">2405</div></button>
+<button class="tile" type="button" data-room="2404" aria-label="Habitación 2404"><div class="numText">2404</div></button>
+<button class="tile" type="button" data-room="2403" aria-label="Habitación 2403"><div class="numText">2403</div></button>
+<button class="tile" type="button" data-room="2402" aria-label="Habitación 2402"><div class="numText">2402</div></button>
+<button class="tile" type="button" data-room="2401" aria-label="Habitación 2401"><div class="numText">2401</div></button>
+      </div>
+    </div>
+    
+    <div class="floor">
+      <div class="floorHead">
+        <b>Piso 23</b>
+        <span class="muted">10 hab.</span>
+      </div>
+      <div class="floorRow">
+        <button class="tile" type="button" data-room="2310" aria-label="Habitación 2310"><div class="numText">2310</div></button>
+<button class="tile" type="button" data-room="2309" aria-label="Habitación 2309"><div class="numText">2309</div></button>
+<button class="tile" type="button" data-room="2308" aria-label="Habitación 2308"><div class="numText">2308</div></button>
+<button class="tile" type="button" data-room="2307" aria-label="Habitación 2307"><div class="numText">2307</div></button>
+<button class="tile" type="button" data-room="2306" aria-label="Habitación 2306"><div class="numText">2306</div></button>
+<button class="tile" type="button" data-room="2305" aria-label="Habitación 2305"><div class="numText">2305</div></button>
+<button class="tile" type="button" data-room="2304" aria-label="Habitación 2304"><div class="numText">2304</div></button>
+<button class="tile" type="button" data-room="2303" aria-label="Habitación 2303"><div class="numText">2303</div></button>
+<button class="tile" type="button" data-room="2302" aria-label="Habitación 2302"><div class="numText">2302</div></button>
+<button class="tile" type="button" data-room="2301" aria-label="Habitación 2301"><div class="numText">2301</div></button>
+      </div>
+    </div>
+    
+    <div class="floor">
+      <div class="floorHead">
+        <b>Piso 22</b>
+        <span class="muted">10 hab.</span>
+      </div>
+      <div class="floorRow">
+        <button class="tile" type="button" data-room="2210" aria-label="Habitación 2210"><div class="numText">2210</div></button>
+<button class="tile" type="button" data-room="2209" aria-label="Habitación 2209"><div class="numText">2209</div></button>
+<button class="tile" type="button" data-room="2208" aria-label="Habitación 2208"><div class="numText">2208</div></button>
+<button class="tile" type="button" data-room="2207" aria-label="Habitación 2207"><div class="numText">2207</div></button>
+<button class="tile" type="button" data-room="2206" aria-label="Habitación 2206"><div class="numText">2206</div></button>
+<button class="tile" type="button" data-room="2205" aria-label="Habitación 2205"><div class="numText">2205</div></button>
+<button class="tile" type="button" data-room="2204" aria-label="Habitación 2204"><div class="numText">2204</div></button>
+<button class="tile" type="button" data-room="2203" aria-label="Habitación 2203"><div class="numText">2203</div></button>
+<button class="tile" type="button" data-room="2202" aria-label="Habitación 2202"><div class="numText">2202</div></button>
+<button class="tile" type="button" data-room="2201" aria-label="Habitación 2201"><div class="numText">2201</div></button>
+      </div>
+    </div>
+    
+    <div class="floor">
+      <div class="floorHead">
+        <b>Piso 21</b>
+        <span class="muted">8 hab.</span>
+      </div>
+      <div class="floorRow">
+        <button class="tile" type="button" data-room="2108" aria-label="Habitación 2108"><div class="numText">2108</div></button>
+<button class="tile" type="button" data-room="2107" aria-label="Habitación 2107"><div class="numText">2107</div></button>
+<button class="tile" type="button" data-room="2106" aria-label="Habitación 2106"><div class="numText">2106</div></button>
+<button class="tile" type="button" data-room="2105" aria-label="Habitación 2105"><div class="numText">2105</div></button>
+<button class="tile" type="button" data-room="2104" aria-label="Habitación 2104"><div class="numText">2104</div></button>
+<button class="tile" type="button" data-room="2103" aria-label="Habitación 2103"><div class="numText">2103</div></button>
+<button class="tile" type="button" data-room="2102" aria-label="Habitación 2102"><div class="numText">2102</div></button>
+<button class="tile" type="button" data-room="2101" aria-label="Habitación 2101"><div class="numText">2101</div></button>
+      </div>
+    </div>
+    
+    </section>
+    
+      <div class="towerSep" aria-hidden="true"></div>
+      
+    <section class="towerBlock">
+      <div class="towerTitle">Palmilla</div>
+      <div class="muted">Pisos 16 al 11 · Secuencia descendente</div>
+      <div class="divider"></div>
+      
+    <div class="floor">
+      <div class="floorHead">
+        <b>Piso 16</b>
+        <span class="muted">8 hab.</span>
+      </div>
+      <div class="floorRow">
+        <button class="tile" type="button" data-room="1605B" aria-label="Habitación 1605B"><div class="numText">1605B</div></button>
+<button class="tile" type="button" data-room="1605A" aria-label="Habitación 1605A"><div class="numText">1605A</div></button>
+<button class="tile" type="button" data-room="1604" aria-label="Habitación 1604"><div class="numText">1604</div></button>
+<button class="tile" type="button" data-room="1603B" aria-label="Habitación 1603B"><div class="numText">1603B</div></button>
+<button class="tile" type="button" data-room="1603A" aria-label="Habitación 1603A"><div class="numText">1603A</div></button>
+<button class="tile" type="button" data-room="1602" aria-label="Habitación 1602"><div class="numText">1602</div></button>
+<button class="tile" type="button" data-room="1601B" aria-label="Habitación 1601B"><div class="numText">1601B</div></button>
+<button class="tile" type="button" data-room="1601A" aria-label="Habitación 1601A"><div class="numText">1601A</div></button>
+      </div>
+    </div>
+    
+    <div class="floor">
+      <div class="floorHead">
+        <b>Piso 15</b>
+        <span class="muted">11 hab.</span>
+      </div>
+      <div class="floorRow">
+        <button class="tile" type="button" data-room="1507B" aria-label="Habitación 1507B"><div class="numText">1507B</div></button>
+<button class="tile" type="button" data-room="1507A" aria-label="Habitación 1507A"><div class="numText">1507A</div></button>
+<button class="tile" type="button" data-room="1506" aria-label="Habitación 1506"><div class="numText">1506</div></button>
+<button class="tile" type="button" data-room="1505B" aria-label="Habitación 1505B"><div class="numText">1505B</div></button>
+<button class="tile" type="button" data-room="1505A" aria-label="Habitación 1505A"><div class="numText">1505A</div></button>
+<button class="tile" type="button" data-room="1504" aria-label="Habitación 1504"><div class="numText">1504</div></button>
+<button class="tile" type="button" data-room="1503B" aria-label="Habitación 1503B"><div class="numText">1503B</div></button>
+<button class="tile" type="button" data-room="1503A" aria-label="Habitación 1503A"><div class="numText">1503A</div></button>
+<button class="tile" type="button" data-room="1502" aria-label="Habitación 1502"><div class="numText">1502</div></button>
+<button class="tile" type="button" data-room="1501B" aria-label="Habitación 1501B"><div class="numText">1501B</div></button>
+<button class="tile" type="button" data-room="1501A" aria-label="Habitación 1501A"><div class="numText">1501A</div></button>
+      </div>
+    </div>
+    
+    <div class="floor">
+      <div class="floorHead">
+        <b>Piso 14</b>
+        <span class="muted">11 hab.</span>
+      </div>
+      <div class="floorRow">
+        <button class="tile" type="button" data-room="1407B" aria-label="Habitación 1407B"><div class="numText">1407B</div></button>
+<button class="tile" type="button" data-room="1407A" aria-label="Habitación 1407A"><div class="numText">1407A</div></button>
+<button class="tile" type="button" data-room="1406" aria-label="Habitación 1406"><div class="numText">1406</div></button>
+<button class="tile" type="button" data-room="1405B" aria-label="Habitación 1405B"><div class="numText">1405B</div></button>
+<button class="tile" type="button" data-room="1405A" aria-label="Habitación 1405A"><div class="numText">1405A</div></button>
+<button class="tile" type="button" data-room="1404" aria-label="Habitación 1404"><div class="numText">1404</div></button>
+<button class="tile" type="button" data-room="1403B" aria-label="Habitación 1403B"><div class="numText">1403B</div></button>
+<button class="tile" type="button" data-room="1403A" aria-label="Habitación 1403A"><div class="numText">1403A</div></button>
+<button class="tile" type="button" data-room="1402" aria-label="Habitación 1402"><div class="numText">1402</div></button>
+<button class="tile" type="button" data-room="1401B" aria-label="Habitación 1401B"><div class="numText">1401B</div></button>
+<button class="tile" type="button" data-room="1401A" aria-label="Habitación 1401A"><div class="numText">1401A</div></button>
+      </div>
+    </div>
+    
+    <div class="floor">
+      <div class="floorHead">
+        <b>Piso 13</b>
+        <span class="muted">14 hab.</span>
+      </div>
+      <div class="floorRow">
+        <button class="tile" type="button" data-room="1309B" aria-label="Habitación 1309B"><div class="numText">1309B</div></button>
+<button class="tile" type="button" data-room="1309A" aria-label="Habitación 1309A"><div class="numText">1309A</div></button>
+<button class="tile" type="button" data-room="1308" aria-label="Habitación 1308"><div class="numText">1308</div></button>
+<button class="tile" type="button" data-room="1307B" aria-label="Habitación 1307B"><div class="numText">1307B</div></button>
+<button class="tile" type="button" data-room="1307A" aria-label="Habitación 1307A"><div class="numText">1307A</div></button>
+<button class="tile" type="button" data-room="1306" aria-label="Habitación 1306"><div class="numText">1306</div></button>
+<button class="tile" type="button" data-room="1305B" aria-label="Habitación 1305B"><div class="numText">1305B</div></button>
+<button class="tile" type="button" data-room="1305A" aria-label="Habitación 1305A"><div class="numText">1305A</div></button>
+<button class="tile" type="button" data-room="1304" aria-label="Habitación 1304"><div class="numText">1304</div></button>
+<button class="tile" type="button" data-room="1303B" aria-label="Habitación 1303B"><div class="numText">1303B</div></button>
+<button class="tile" type="button" data-room="1303A" aria-label="Habitación 1303A"><div class="numText">1303A</div></button>
+<button class="tile" type="button" data-room="1302" aria-label="Habitación 1302"><div class="numText">1302</div></button>
+<button class="tile" type="button" data-room="1301B" aria-label="Habitación 1301B"><div class="numText">1301B</div></button>
+<button class="tile" type="button" data-room="1301A" aria-label="Habitación 1301A"><div class="numText">1301A</div></button>
+      </div>
+    </div>
+    
+    <div class="floor">
+      <div class="floorHead">
+        <b>Piso 12</b>
+        <span class="muted">14 hab.</span>
+      </div>
+      <div class="floorRow">
+        <button class="tile" type="button" data-room="1209B" aria-label="Habitación 1209B"><div class="numText">1209B</div></button>
+<button class="tile" type="button" data-room="1209A" aria-label="Habitación 1209A"><div class="numText">1209A</div></button>
+<button class="tile" type="button" data-room="1208" aria-label="Habitación 1208"><div class="numText">1208</div></button>
+<button class="tile" type="button" data-room="1207B" aria-label="Habitación 1207B"><div class="numText">1207B</div></button>
+<button class="tile" type="button" data-room="1207A" aria-label="Habitación 1207A"><div class="numText">1207A</div></button>
+<button class="tile" type="button" data-room="1206" aria-label="Habitación 1206"><div class="numText">1206</div></button>
+<button class="tile" type="button" data-room="1205B" aria-label="Habitación 1205B"><div class="numText">1205B</div></button>
+<button class="tile" type="button" data-room="1205A" aria-label="Habitación 1205A"><div class="numText">1205A</div></button>
+<button class="tile" type="button" data-room="1204" aria-label="Habitación 1204"><div class="numText">1204</div></button>
+<button class="tile" type="button" data-room="1203B" aria-label="Habitación 1203B"><div class="numText">1203B</div></button>
+<button class="tile" type="button" data-room="1203A" aria-label="Habitación 1203A"><div class="numText">1203A</div></button>
+<button class="tile" type="button" data-room="1202" aria-label="Habitación 1202"><div class="numText">1202</div></button>
+<button class="tile" type="button" data-room="1201B" aria-label="Habitación 1201B"><div class="numText">1201B</div></button>
+<button class="tile" type="button" data-room="1201A" aria-label="Habitación 1201A"><div class="numText">1201A</div></button>
+      </div>
+    </div>
+    
+    <div class="floor">
+      <div class="floorHead">
+        <b>Piso 11</b>
+        <span class="muted">14 hab.</span>
+      </div>
+      <div class="floorRow">
+        <button class="tile" type="button" data-room="1109B" aria-label="Habitación 1109B"><div class="numText">1109B</div></button>
+<button class="tile" type="button" data-room="1109A" aria-label="Habitación 1109A"><div class="numText">1109A</div></button>
+<button class="tile" type="button" data-room="1108" aria-label="Habitación 1108"><div class="numText">1108</div></button>
+<button class="tile" type="button" data-room="1107B" aria-label="Habitación 1107B"><div class="numText">1107B</div></button>
+<button class="tile" type="button" data-room="1107A" aria-label="Habitación 1107A"><div class="numText">1107A</div></button>
+<button class="tile" type="button" data-room="1106" aria-label="Habitación 1106"><div class="numText">1106</div></button>
+<button class="tile" type="button" data-room="1105B" aria-label="Habitación 1105B"><div class="numText">1105B</div></button>
+<button class="tile" type="button" data-room="1105A" aria-label="Habitación 1105A"><div class="numText">1105A</div></button>
+<button class="tile" type="button" data-room="1104" aria-label="Habitación 1104"><div class="numText">1104</div></button>
+<button class="tile" type="button" data-room="1103B" aria-label="Habitación 1103B"><div class="numText">1103B</div></button>
+<button class="tile" type="button" data-room="1103A" aria-label="Habitación 1103A"><div class="numText">1103A</div></button>
+<button class="tile" type="button" data-room="1102" aria-label="Habitación 1102"><div class="numText">1102</div></button>
+<button class="tile" type="button" data-room="1101B" aria-label="Habitación 1101B"><div class="numText">1101B</div></button>
+<button class="tile" type="button" data-room="1101A" aria-label="Habitación 1101A"><div class="numText">1101A</div></button>
+      </div>
+    </div>
+    
+    </section>
+    
+      <div class="towerSep" aria-hidden="true"></div>
+      
+    <section class="towerBlock">
+      <div class="towerTitle">Unique</div>
+      <div class="muted">Pisos 47 al 41 · Secuencia descendente</div>
+      <div class="divider"></div>
+      
+    <div class="floor">
+      <div class="floorHead">
+        <b>Piso 47</b>
+        <span class="muted">31 hab.</span>
+      </div>
+      <div class="floorRow">
+        <button class="tile" type="button" data-room="4733" aria-label="Habitación 4733"><div class="numText">4733</div></button>
+<button class="tile" type="button" data-room="4732" aria-label="Habitación 4732"><div class="numText">4732</div></button>
+<button class="tile" type="button" data-room="4731" aria-label="Habitación 4731"><div class="numText">4731</div></button>
+<button class="tile" type="button" data-room="4730" aria-label="Habitación 4730"><div class="numText">4730</div></button>
+<button class="tile" type="button" data-room="4729" aria-label="Habitación 4729"><div class="numText">4729</div></button>
+<button class="tile" type="button" data-room="4728" aria-label="Habitación 4728"><div class="numText">4728</div></button>
+<button class="tile" type="button" data-room="4727" aria-label="Habitación 4727"><div class="numText">4727</div></button>
+<button class="tile" type="button" data-room="4726" aria-label="Habitación 4726"><div class="numText">4726</div></button>
+<button class="tile" type="button" data-room="4725" aria-label="Habitación 4725"><div class="numText">4725</div></button>
+<button class="tile" type="button" data-room="4724" aria-label="Habitación 4724"><div class="numText">4724</div></button>
+<button class="tile" type="button" data-room="4723" aria-label="Habitación 4723"><div class="numText">4723</div></button>
+<button class="tile" type="button" data-room="4722" aria-label="Habitación 4722"><div class="numText">4722</div></button>
+<button class="tile" type="button" data-room="4721" aria-label="Habitación 4721"><div class="numText">4721</div></button>
+<button class="tile" type="button" data-room="4720" aria-label="Habitación 4720"><div class="numText">4720</div></button>
+<button class="tile" type="button" data-room="4719" aria-label="Habitación 4719"><div class="numText">4719</div></button>
+<button class="tile" type="button" data-room="4718" aria-label="Habitación 4718"><div class="numText">4718</div></button>
+<button class="tile" type="button" data-room="4717" aria-label="Habitación 4717"><div class="numText">4717</div></button>
+<button class="tile" type="button" data-room="4716" aria-label="Habitación 4716"><div class="numText">4716</div></button>
+<button class="tile" type="button" data-room="4715" aria-label="Habitación 4715"><div class="numText">4715</div></button>
+<button class="tile" type="button" data-room="4714" aria-label="Habitación 4714"><div class="numText">4714</div></button>
+<button class="tile" type="button" data-room="4712" aria-label="Habitación 4712"><div class="numText">4712</div></button>
+<button class="tile" type="button" data-room="4711" aria-label="Habitación 4711"><div class="numText">4711</div></button>
+<button class="tile" type="button" data-room="4710" aria-label="Habitación 4710"><div class="numText">4710</div></button>
+<button class="tile" type="button" data-room="4709" aria-label="Habitación 4709"><div class="numText">4709</div></button>
+<button class="tile" type="button" data-room="4707" aria-label="Habitación 4707"><div class="numText">4707</div></button>
+<button class="tile" type="button" data-room="4706" aria-label="Habitación 4706"><div class="numText">4706</div></button>
+<button class="tile" type="button" data-room="4705" aria-label="Habitación 4705"><div class="numText">4705</div></button>
+<button class="tile" type="button" data-room="4704" aria-label="Habitación 4704"><div class="numText">4704</div></button>
+<button class="tile" type="button" data-room="4703" aria-label="Habitación 4703"><div class="numText">4703</div></button>
+<button class="tile" type="button" data-room="4702" aria-label="Habitación 4702"><div class="numText">4702</div></button>
+<button class="tile" type="button" data-room="4701" aria-label="Habitación 4701"><div class="numText">4701</div></button>
+      </div>
+    </div>
+    
+    <div class="floor">
+      <div class="floorHead">
+        <b>Piso 46</b>
+        <span class="muted">32 hab.</span>
+      </div>
+      <div class="floorRow">
+        <button class="tile" type="button" data-room="4633" aria-label="Habitación 4633"><div class="numText">4633</div></button>
+<button class="tile" type="button" data-room="4632" aria-label="Habitación 4632"><div class="numText">4632</div></button>
+<button class="tile" type="button" data-room="4631" aria-label="Habitación 4631"><div class="numText">4631</div></button>
+<button class="tile" type="button" data-room="4630" aria-label="Habitación 4630"><div class="numText">4630</div></button>
+<button class="tile" type="button" data-room="4629" aria-label="Habitación 4629"><div class="numText">4629</div></button>
+<button class="tile" type="button" data-room="4628" aria-label="Habitación 4628"><div class="numText">4628</div></button>
+<button class="tile" type="button" data-room="4627" aria-label="Habitación 4627"><div class="numText">4627</div></button>
+<button class="tile" type="button" data-room="4626" aria-label="Habitación 4626"><div class="numText">4626</div></button>
+<button class="tile" type="button" data-room="4625" aria-label="Habitación 4625"><div class="numText">4625</div></button>
+<button class="tile" type="button" data-room="4624" aria-label="Habitación 4624"><div class="numText">4624</div></button>
+<button class="tile" type="button" data-room="4623" aria-label="Habitación 4623"><div class="numText">4623</div></button>
+<button class="tile" type="button" data-room="4622" aria-label="Habitación 4622"><div class="numText">4622</div></button>
+<button class="tile" type="button" data-room="4621" aria-label="Habitación 4621"><div class="numText">4621</div></button>
+<button class="tile" type="button" data-room="4620" aria-label="Habitación 4620"><div class="numText">4620</div></button>
+<button class="tile" type="button" data-room="4619" aria-label="Habitación 4619"><div class="numText">4619</div></button>
+<button class="tile" type="button" data-room="4618" aria-label="Habitación 4618"><div class="numText">4618</div></button>
+<button class="tile" type="button" data-room="4617" aria-label="Habitación 4617"><div class="numText">4617</div></button>
+<button class="tile" type="button" data-room="4616" aria-label="Habitación 4616"><div class="numText">4616</div></button>
+<button class="tile" type="button" data-room="4615" aria-label="Habitación 4615"><div class="numText">4615</div></button>
+<button class="tile" type="button" data-room="4614" aria-label="Habitación 4614"><div class="numText">4614</div></button>
+<button class="tile" type="button" data-room="4612" aria-label="Habitación 4612"><div class="numText">4612</div></button>
+<button class="tile" type="button" data-room="4611" aria-label="Habitación 4611"><div class="numText">4611</div></button>
+<button class="tile" type="button" data-room="4610" aria-label="Habitación 4610"><div class="numText">4610</div></button>
+<button class="tile" type="button" data-room="4609" aria-label="Habitación 4609"><div class="numText">4609</div></button>
+<button class="tile" type="button" data-room="4608" aria-label="Habitación 4608"><div class="numText">4608</div></button>
+<button class="tile" type="button" data-room="4607" aria-label="Habitación 4607"><div class="numText">4607</div></button>
+<button class="tile" type="button" data-room="4606" aria-label="Habitación 4606"><div class="numText">4606</div></button>
+<button class="tile" type="button" data-room="4605" aria-label="Habitación 4605"><div class="numText">4605</div></button>
+<button class="tile" type="button" data-room="4604" aria-label="Habitación 4604"><div class="numText">4604</div></button>
+<button class="tile" type="button" data-room="4603" aria-label="Habitación 4603"><div class="numText">4603</div></button>
+<button class="tile" type="button" data-room="4602" aria-label="Habitación 4602"><div class="numText">4602</div></button>
+<button class="tile" type="button" data-room="4601" aria-label="Habitación 4601"><div class="numText">4601</div></button>
+      </div>
+    </div>
+    
+    <div class="floor">
+      <div class="floorHead">
+        <b>Piso 45</b>
+        <span class="muted">32 hab.</span>
+      </div>
+      <div class="floorRow">
+        <button class="tile" type="button" data-room="4533" aria-label="Habitación 4533"><div class="numText">4533</div></button>
+<button class="tile" type="button" data-room="4532" aria-label="Habitación 4532"><div class="numText">4532</div></button>
+<button class="tile" type="button" data-room="4531" aria-label="Habitación 4531"><div class="numText">4531</div></button>
+<button class="tile" type="button" data-room="4530" aria-label="Habitación 4530"><div class="numText">4530</div></button>
+<button class="tile" type="button" data-room="4529" aria-label="Habitación 4529"><div class="numText">4529</div></button>
+<button class="tile" type="button" data-room="4528" aria-label="Habitación 4528"><div class="numText">4528</div></button>
+<button class="tile" type="button" data-room="4527" aria-label="Habitación 4527"><div class="numText">4527</div></button>
+<button class="tile" type="button" data-room="4526" aria-label="Habitación 4526"><div class="numText">4526</div></button>
+<button class="tile" type="button" data-room="4525" aria-label="Habitación 4525"><div class="numText">4525</div></button>
+<button class="tile" type="button" data-room="4524" aria-label="Habitación 4524"><div class="numText">4524</div></button>
+<button class="tile" type="button" data-room="4523" aria-label="Habitación 4523"><div class="numText">4523</div></button>
+<button class="tile" type="button" data-room="4522" aria-label="Habitación 4522"><div class="numText">4522</div></button>
+<button class="tile" type="button" data-room="4521" aria-label="Habitación 4521"><div class="numText">4521</div></button>
+<button class="tile" type="button" data-room="4520" aria-label="Habitación 4520"><div class="numText">4520</div></button>
+<button class="tile" type="button" data-room="4519" aria-label="Habitación 4519"><div class="numText">4519</div></button>
+<button class="tile" type="button" data-room="4518" aria-label="Habitación 4518"><div class="numText">4518</div></button>
+<button class="tile" type="button" data-room="4517" aria-label="Habitación 4517"><div class="numText">4517</div></button>
+<button class="tile" type="button" data-room="4516" aria-label="Habitación 4516"><div class="numText">4516</div></button>
+<button class="tile" type="button" data-room="4515" aria-label="Habitación 4515"><div class="numText">4515</div></button>
+<button class="tile" type="button" data-room="4514" aria-label="Habitación 4514"><div class="numText">4514</div></button>
+<button class="tile" type="button" data-room="4512" aria-label="Habitación 4512"><div class="numText">4512</div></button>
+<button class="tile" type="button" data-room="4511" aria-label="Habitación 4511"><div class="numText">4511</div></button>
+<button class="tile" type="button" data-room="4510" aria-label="Habitación 4510"><div class="numText">4510</div></button>
+<button class="tile" type="button" data-room="4509" aria-label="Habitación 4509"><div class="numText">4509</div></button>
+<button class="tile" type="button" data-room="4508" aria-label="Habitación 4508"><div class="numText">4508</div></button>
+<button class="tile" type="button" data-room="4507" aria-label="Habitación 4507"><div class="numText">4507</div></button>
+<button class="tile" type="button" data-room="4506" aria-label="Habitación 4506"><div class="numText">4506</div></button>
+<button class="tile" type="button" data-room="4505" aria-label="Habitación 4505"><div class="numText">4505</div></button>
+<button class="tile" type="button" data-room="4504" aria-label="Habitación 4504"><div class="numText">4504</div></button>
+<button class="tile" type="button" data-room="4503" aria-label="Habitación 4503"><div class="numText">4503</div></button>
+<button class="tile" type="button" data-room="4502" aria-label="Habitación 4502"><div class="numText">4502</div></button>
+<button class="tile" type="button" data-room="4501" aria-label="Habitación 4501"><div class="numText">4501</div></button>
+      </div>
+    </div>
+    
+    <div class="floor">
+      <div class="floorHead">
+        <b>Piso 44</b>
+        <span class="muted">30 hab.</span>
+      </div>
+      <div class="floorRow">
+        <button class="tile" type="button" data-room="4433" aria-label="Habitación 4433"><div class="numText">4433</div></button>
+<button class="tile" type="button" data-room="4432" aria-label="Habitación 4432"><div class="numText">4432</div></button>
+<button class="tile" type="button" data-room="4431" aria-label="Habitación 4431"><div class="numText">4431</div></button>
+<button class="tile" type="button" data-room="4430" aria-label="Habitación 4430"><div class="numText">4430</div></button>
+<button class="tile" type="button" data-room="4429" aria-label="Habitación 4429"><div class="numText">4429</div></button>
+<button class="tile" type="button" data-room="4428" aria-label="Habitación 4428"><div class="numText">4428</div></button>
+<button class="tile" type="button" data-room="4427" aria-label="Habitación 4427"><div class="numText">4427</div></button>
+<button class="tile" type="button" data-room="4426" aria-label="Habitación 4426"><div class="numText">4426</div></button>
+<button class="tile" type="button" data-room="4425" aria-label="Habitación 4425"><div class="numText">4425</div></button>
+<button class="tile" type="button" data-room="4424" aria-label="Habitación 4424"><div class="numText">4424</div></button>
+<button class="tile" type="button" data-room="4423" aria-label="Habitación 4423"><div class="numText">4423</div></button>
+<button class="tile" type="button" data-room="4422" aria-label="Habitación 4422"><div class="numText">4422</div></button>
+<button class="tile" type="button" data-room="4421" aria-label="Habitación 4421"><div class="numText">4421</div></button>
+<button class="tile" type="button" data-room="4420" aria-label="Habitación 4420"><div class="numText">4420</div></button>
+<button class="tile" type="button" data-room="4419" aria-label="Habitación 4419"><div class="numText">4419</div></button>
+<button class="tile" type="button" data-room="4418" aria-label="Habitación 4418"><div class="numText">4418</div></button>
+<button class="tile" type="button" data-room="4417" aria-label="Habitación 4417"><div class="numText">4417</div></button>
+<button class="tile" type="button" data-room="4416" aria-label="Habitación 4416"><div class="numText">4416</div></button>
+<button class="tile" type="button" data-room="4415" aria-label="Habitación 4415"><div class="numText">4415</div></button>
+<button class="tile" type="button" data-room="4414" aria-label="Habitación 4414"><div class="numText">4414</div></button>
+<button class="tile" type="button" data-room="4412" aria-label="Habitación 4412"><div class="numText">4412</div></button>
+<button class="tile" type="button" data-room="4411" aria-label="Habitación 4411"><div class="numText">4411</div></button>
+<button class="tile" type="button" data-room="4410" aria-label="Habitación 4410"><div class="numText">4410</div></button>
+<button class="tile" type="button" data-room="4409" aria-label="Habitación 4409"><div class="numText">4409</div></button>
+<button class="tile" type="button" data-room="4406" aria-label="Habitación 4406"><div class="numText">4406</div></button>
+<button class="tile" type="button" data-room="4405" aria-label="Habitación 4405"><div class="numText">4405</div></button>
+<button class="tile" type="button" data-room="4404" aria-label="Habitación 4404"><div class="numText">4404</div></button>
+<button class="tile" type="button" data-room="4403" aria-label="Habitación 4403"><div class="numText">4403</div></button>
+<button class="tile" type="button" data-room="4402" aria-label="Habitación 4402"><div class="numText">4402</div></button>
+<button class="tile" type="button" data-room="4401" aria-label="Habitación 4401"><div class="numText">4401</div></button>
+      </div>
+    </div>
+    
+    <div class="floor">
+      <div class="floorHead">
+        <b>Piso 43</b>
+        <span class="muted">21 hab.</span>
+      </div>
+      <div class="floorRow">
+        <button class="tile" type="button" data-room="4333" aria-label="Habitación 4333"><div class="numText">4333</div></button>
+<button class="tile" type="button" data-room="4332" aria-label="Habitación 4332"><div class="numText">4332</div></button>
+<button class="tile" type="button" data-room="4331" aria-label="Habitación 4331"><div class="numText">4331</div></button>
+<button class="tile" type="button" data-room="4330" aria-label="Habitación 4330"><div class="numText">4330</div></button>
+<button class="tile" type="button" data-room="4329" aria-label="Habitación 4329"><div class="numText">4329</div></button>
+<button class="tile" type="button" data-room="4328" aria-label="Habitación 4328"><div class="numText">4328</div></button>
+<button class="tile" type="button" data-room="4327" aria-label="Habitación 4327"><div class="numText">4327</div></button>
+<button class="tile" type="button" data-room="4326" aria-label="Habitación 4326"><div class="numText">4326</div></button>
+<button class="tile" type="button" data-room="4325" aria-label="Habitación 4325"><div class="numText">4325</div></button>
+<button class="tile" type="button" data-room="4324" aria-label="Habitación 4324"><div class="numText">4324</div></button>
+<button class="tile" type="button" data-room="4323" aria-label="Habitación 4323"><div class="numText">4323</div></button>
+<button class="tile" type="button" data-room="4322" aria-label="Habitación 4322"><div class="numText">4322</div></button>
+<button class="tile" type="button" data-room="4321" aria-label="Habitación 4321"><div class="numText">4321</div></button>
+<button class="tile" type="button" data-room="4320" aria-label="Habitación 4320"><div class="numText">4320</div></button>
+<button class="tile" type="button" data-room="4319" aria-label="Habitación 4319"><div class="numText">4319</div></button>
+<button class="tile" type="button" data-room="4318" aria-label="Habitación 4318"><div class="numText">4318</div></button>
+<button class="tile" type="button" data-room="4317" aria-label="Habitación 4317"><div class="numText">4317</div></button>
+<button class="tile" type="button" data-room="4316" aria-label="Habitación 4316"><div class="numText">4316</div></button>
+<button class="tile" type="button" data-room="4315" aria-label="Habitación 4315"><div class="numText">4315</div></button>
+<button class="tile" type="button" data-room="4314" aria-label="Habitación 4314"><div class="numText">4314</div></button>
+<button class="tile" type="button" data-room="4312" aria-label="Habitación 4312"><div class="numText">4312</div></button>
+      </div>
+    </div>
+    
+    <div class="floor">
+      <div class="floorHead">
+        <b>Piso 42</b>
+        <span class="muted">21 hab.</span>
+      </div>
+      <div class="floorRow">
+        <button class="tile" type="button" data-room="4233" aria-label="Habitación 4233"><div class="numText">4233</div></button>
+<button class="tile" type="button" data-room="4232" aria-label="Habitación 4232"><div class="numText">4232</div></button>
+<button class="tile" type="button" data-room="4231" aria-label="Habitación 4231"><div class="numText">4231</div></button>
+<button class="tile" type="button" data-room="4230" aria-label="Habitación 4230"><div class="numText">4230</div></button>
+<button class="tile" type="button" data-room="4229" aria-label="Habitación 4229"><div class="numText">4229</div></button>
+<button class="tile" type="button" data-room="4228" aria-label="Habitación 4228"><div class="numText">4228</div></button>
+<button class="tile" type="button" data-room="4227" aria-label="Habitación 4227"><div class="numText">4227</div></button>
+<button class="tile" type="button" data-room="4226" aria-label="Habitación 4226"><div class="numText">4226</div></button>
+<button class="tile" type="button" data-room="4225" aria-label="Habitación 4225"><div class="numText">4225</div></button>
+<button class="tile" type="button" data-room="4224" aria-label="Habitación 4224"><div class="numText">4224</div></button>
+<button class="tile" type="button" data-room="4223" aria-label="Habitación 4223"><div class="numText">4223</div></button>
+<button class="tile" type="button" data-room="4222" aria-label="Habitación 4222"><div class="numText">4222</div></button>
+<button class="tile" type="button" data-room="4221" aria-label="Habitación 4221"><div class="numText">4221</div></button>
+<button class="tile" type="button" data-room="4220" aria-label="Habitación 4220"><div class="numText">4220</div></button>
+<button class="tile" type="button" data-room="4219" aria-label="Habitación 4219"><div class="numText">4219</div></button>
+<button class="tile" type="button" data-room="4218" aria-label="Habitación 4218"><div class="numText">4218</div></button>
+<button class="tile" type="button" data-room="4217" aria-label="Habitación 4217"><div class="numText">4217</div></button>
+<button class="tile" type="button" data-room="4216" aria-label="Habitación 4216"><div class="numText">4216</div></button>
+<button class="tile" type="button" data-room="4215" aria-label="Habitación 4215"><div class="numText">4215</div></button>
+<button class="tile" type="button" data-room="4214" aria-label="Habitación 4214"><div class="numText">4214</div></button>
+<button class="tile" type="button" data-room="4212" aria-label="Habitación 4212"><div class="numText">4212</div></button>
+      </div>
+    </div>
+    
+    <div class="floor">
+      <div class="floorHead">
+        <b>Piso 41</b>
+        <span class="muted">20 hab.</span>
+      </div>
+      <div class="floorRow">
+        <button class="tile" type="button" data-room="4132" aria-label="Habitación 4132"><div class="numText">4132</div></button>
+<button class="tile" type="button" data-room="4131" aria-label="Habitación 4131"><div class="numText">4131</div></button>
+<button class="tile" type="button" data-room="4130" aria-label="Habitación 4130"><div class="numText">4130</div></button>
+<button class="tile" type="button" data-room="4129" aria-label="Habitación 4129"><div class="numText">4129</div></button>
+<button class="tile" type="button" data-room="4128" aria-label="Habitación 4128"><div class="numText">4128</div></button>
+<button class="tile" type="button" data-room="4127" aria-label="Habitación 4127"><div class="numText">4127</div></button>
+<button class="tile" type="button" data-room="4126" aria-label="Habitación 4126"><div class="numText">4126</div></button>
+<button class="tile" type="button" data-room="4125" aria-label="Habitación 4125"><div class="numText">4125</div></button>
+<button class="tile" type="button" data-room="4124" aria-label="Habitación 4124"><div class="numText">4124</div></button>
+<button class="tile" type="button" data-room="4123" aria-label="Habitación 4123"><div class="numText">4123</div></button>
+<button class="tile" type="button" data-room="4122" aria-label="Habitación 4122"><div class="numText">4122</div></button>
+<button class="tile" type="button" data-room="4121" aria-label="Habitación 4121"><div class="numText">4121</div></button>
+<button class="tile" type="button" data-room="4120" aria-label="Habitación 4120"><div class="numText">4120</div></button>
+<button class="tile" type="button" data-room="4119" aria-label="Habitación 4119"><div class="numText">4119</div></button>
+<button class="tile" type="button" data-room="4118" aria-label="Habitación 4118"><div class="numText">4118</div></button>
+<button class="tile" type="button" data-room="4117" aria-label="Habitación 4117"><div class="numText">4117</div></button>
+<button class="tile" type="button" data-room="4116" aria-label="Habitación 4116"><div class="numText">4116</div></button>
+<button class="tile" type="button" data-room="4115" aria-label="Habitación 4115"><div class="numText">4115</div></button>
+<button class="tile" type="button" data-room="4114" aria-label="Habitación 4114"><div class="numText">4114</div></button>
+<button class="tile" type="button" data-room="4112" aria-label="Habitación 4112"><div class="numText">4112</div></button>
+      </div>
+    </div>
+    
+    </section>
+    
+    </div>
+  </section>
+<footer>
+    <div style="max-width:1200px;margin:0 auto;line-height:1.8">
+      <div style="font-weight:600;color:rgba(255,255,255,0.85)">
+        Catálogo de apoyo a consulta — Krystal Grand Los Cabos.
+      </div>
+      <div>
+        Proyecto y operación: <b>Luis Hernaldo</b>.
+      </div>
+      <div style="margin-top:8px;font-weight:800;letter-spacing:2px;">
+        JULU®
+      </div>
+    </div>
+  </footer>
+
+<!-- Modal de ficha (solo aparece si la habitación existe en el JSON) -->
+<div class="catalogOverlay" id="catalogOverlay" aria-hidden="true">
+  <div class="catalogModal" role="dialog" aria-modal="true" aria-labelledby="cTitle">
+    <div class="catalogTop">
+      <h2 id="cTitle">Ficha</h2>
+      <div class="catalogClose" id="catalogClose" title="Cerrar (ESC)">✕</div>
+    </div>
+    <div class="catalogBody">
+      <div class="catalogGallery">
+        <div class="catalogHero"><img id="cHero" alt="Vista" /></div>
+        <div class="catalogThumbs" id="cThumbs"></div>
+        <div class="videoWrap" id="cVideoWrap">
+          <video id="cVideo" controls playsinline></video>
+        </div>
+      </div>
+      <div class="catalogSide">
+        <p class="catalogSub" id="cSub"></p>
+        <div class="catalogKV">
+          <div class="box"><b>Torre</b><span id="cTorre">—</span></div>
+          <div class="box"><b>Piso</b><span id="cPiso">—</span></div>
+          <div class="box"><b>Tipo de cama</b><span id="cCama">—</span></div>
+          <div class="box"><b>Tipo de habitación</b><span id="cTipo">—</span></div>
+        </div>
+
+        <div class="catalogList">
+          <h4>Características</h4>
+          <ul id="cCar"></ul>
+        </div>
+
+        <div class="videoBtn" id="cVideoBtn" style="display:none;">🎥 Ver video de la vista</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal WIP (cuando la habitación aún no tiene ficha en el JSON) -->
+<div class="catalogOverlay" id="wipOverlay" aria-hidden="true">
+  <div class="catalogModal" role="dialog" aria-modal="true" aria-labelledby="wTitle" style="max-width: 860px;">
+    <div class="catalogTop">
+      <h2 id="wTitle">En construcción</h2>
+      <div class="catalogClose" id="wipClose" title="Cerrar (ESC)">✕</div>
+    </div>
+    <div style="padding:22px 18px 24px; text-align:center;">
+      <img src="https://res.cloudinary.com/dor6za85u/image/upload/v1765651460/Krystal_Grand_wo1rbs.jpg" alt="Krystal Grand" style="height:54px; border-radius:14px; border:1px solid rgba(255,255,255,.10);">
+      <div style="margin-top:14px; display:flex; justify-content:center;">
+        <img src="https://res.cloudinary.com/dor6za85u/image/upload/v1770176416/figure_painting_interior_500_clr_12696_kqzpsk.gif" alt="Cargando" style="width:86px; height:86px; border-radius:22px; border:1px solid rgba(255,255,255,.10); background:rgba(10,14,20,.35); padding:12px;">
+      </div>
+      <p style="margin:14px auto 0; max-width:720px; color: rgba(255,255,255,.78); font-size:13px; line-height:1.55;">
+        <b>Estamos trabajando en este espacio</b> para que puedas tener una facilidad en la interacción y una consulta más rápida de las vistas por habitación.
+      </p>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+  // === Reloj en vivo ===
+  function updateClock(){
+    const now = new Date();
+    const time = now.toLocaleTimeString('es-MX', {hour12:false});
+    const date = now.toLocaleDateString('es-MX', {
+      day:'2-digit', month:'long', year:'numeric'
+    });
+    const clockEl = document.getElementById('clock');
+    const dateEl = document.getElementById('date');
+    if(clockEl) clockEl.textContent = time;
+    if(dateEl) dateEl.textContent = date.charAt(0).toUpperCase() + date.slice(1);
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // === Catálogo de Vistas: lectura de JSON + estados + modal ===
+  const CATALOG_URLS = ["habitaciones_krystal.json", "habitaciones.json"]; // aquí vivirá tu JSON
+  const LOADING_GIF = "https://res.cloudinary.com/dor6za85u/image/upload/v1770176416/figure_painting_interior_500_clr_12696_kqzpsk.gif";
+
+  let CATALOG = null; // null = no se cargó (se queda tal cual)
+
+  function computeTower(roomNumStr){
+    const first = (roomNumStr || "")[0];
+    if (first === "1") return "Palmilla";
+    if (first === "2") return "Altitude";
+    if (first === "4") return "Unique";
+    return "Por definir";
+  }
+
+  function computeFloor(roomNumStr){
+    // segundo dígito: 1603 -> 6
+    const d = (roomNumStr || "")[1];
+    const n = parseInt(d, 10);
+    return Number.isFinite(n) ? n : "—";
+  }
+
+  function normalizeLabel(s){
+    return (s ?? "").toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  }
+
+  function pickImages(room){
+    const imgs = Array.isArray(room?.imagenes) ? room.imagenes : [];
+    const getBy = (key) => imgs.find(x => normalizeLabel(x?.etiqueta) === key && x?.src)?.src;
+
+    const left = getBy("izquierda");
+    const center = getBy("centro");
+    const right = getBy("derecha");
+    const ordered = [left, center, right].filter(Boolean);
+
+    if (!ordered.length){
+      return imgs.map(x => x?.src).filter(Boolean).slice(0, 3);
+    }
+    return ordered.slice(0, 3);
+  }
+
+  function openCatalogModal(roomNum){
+    if (!CATALOG) return;
+    const room = CATALOG[roomNum];
+    if (!room) return;
+
+    const title = room.titulo || ("Habitación " + roomNum);
+    document.getElementById("cTitle").textContent = title;
+
+    const tipoHabitacion = room.tipo_habitacion || room.categoria || "por definir";
+    const vista = room.vista || "por definir";
+    document.getElementById("cSub").textContent = tipoHabitacion + " · " + vista;
+
+    const torre = room.torre || computeTower(roomNum);
+    const piso = (room.piso ?? computeFloor(roomNum));
+    const cama = room.tipo_cama || "por definir";
+    const tipo = room.tipo_habitacion || room.categoria || "por definir";
+
+    document.getElementById("cTorre").textContent = torre;
+    document.getElementById("cPiso").textContent = piso;
+    document.getElementById("cCama").textContent = cama;
+    document.getElementById("cTipo").textContent = tipo;
+
+    // Características
+    const car = Array.isArray(room.caracteristicas) ? room.caracteristicas : [];
+    const ul = document.getElementById("cCar");
+    ul.innerHTML = (car.length ? car : ["Por definir"]).map(v => `<li>${v}</li>`).join("");
+
+    // Imágenes
+    const imgs = pickImages(room);
+    const hero = document.getElementById("cHero");
+    hero.src = imgs[0] || "https://images.unsplash.com/photo-1501117716987-c8e1ecb2100b?auto=format&fit=crop&w=1400&q=60";
+
+    const thumbs = document.getElementById("cThumbs");
+    thumbs.innerHTML = imgs.map((src, i) => `
+      <div class="catalogThumb" title="Vista ${i+1}">
+        <img src="${src}" alt="Vista ${i+1}">
+      </div>
+    `).join("");
+
+    // click thumbs -> hero
+    thumbs.querySelectorAll(".catalogThumb").forEach((el, idx) => {
+      el.addEventListener("click", () => { hero.src = imgs[idx]; });
+    });
+
+    // Video
+    const vsrc = room.video_vista?.src || room.video?.src || room.video_vista || room.video;
+    const videoBtn = document.getElementById("cVideoBtn");
+    const videoWrap = document.getElementById("cVideoWrap");
+    const videoEl = document.getElementById("cVideo");
+
+    if (vsrc){
+      videoBtn.style.display = "flex";
+      videoWrap.style.display = "none";
+      videoEl.src = vsrc;
+
+      videoBtn.onclick = () => {
+        videoWrap.style.display = "block";
+        try{ videoEl.play(); }catch(e){}
+      };
+    } else {
+      videoBtn.style.display = "none";
+      videoWrap.style.display = "none";
+      videoEl.removeAttribute("src");
+    }
+
+    const overlay = document.getElementById("catalogOverlay");
+    overlay.style.display = "flex";
+    overlay.setAttribute("aria-hidden","false");
+  }
+
+  function closeCatalogModal(){
+    const overlay = document.getElementById("catalogOverlay");
+    overlay.style.display = "none";
+    overlay.setAttribute("aria-hidden","true");
+    const videoEl = document.getElementById("cVideo");
+    try{ videoEl.pause(); }catch(e){}
+  }
+
+
+  
+  function openWipModal(roomNum){
+    const overlay = document.getElementById("wipOverlay");
+    if (!overlay) return;
+
+    // título
+    const t = document.getElementById("wTitle");
+    const torre = computeTower(roomNum);
+    const piso = computeFloor(roomNum);
+    if (t) t.textContent = `Habitación ${roomNum} · ${torre} · Piso ${piso}`;
+
+    overlay.style.display = "flex";
+    overlay.setAttribute("aria-hidden","false");
+  }
+
+  function closeWipModal
+(){
+    const overlay = document.getElementById("wipOverlay");
+    if (!overlay) return;
+    overlay.style.display = "none";
+    overlay.setAttribute("aria-hidden","true");
+  }
+
+  function markTilesFromCatalog(){
+    const tiles = document.querySelectorAll("button.tile[data-room]");
+    tiles.forEach(btn => {
+      const num = btn.getAttribute("data-room");
+      const info = CATALOG?.[num];
+
+      if (info){
+        btn.classList.add("loaded");
+        btn.setAttribute("title", "Ver ficha");
+        btn.setAttribute("aria-label", "Ver ficha habitación " + num);
+
+        if (!btn.querySelector(".okMark")){
+          const ok = document.createElement("div");
+          ok.className = "okMark";
+          ok.textContent = "✔︎ Ficha";
+          btn.appendChild(ok);
+        }
+
+      } else {
+        btn.classList.add("pending");
+        btn.setAttribute("title", "Aún sin ficha");
+        btn.setAttribute("aria-label", "Habitación " + num + " sin ficha");
+        if (!btn.querySelector(".loadingDot")){
+          const dot = document.createElement("div");
+          dot.className = "loadingDot";
+          dot.innerHTML = `<img src="${LOADING_GIF}" alt="Cargando">`;
+          btn.appendChild(dot);
+        }
+      }
+    });
+  }
+
+  
+  function bindTileClicks(){
+    const tiles = document.querySelectorAll("button.tile[data-room]");
+    tiles.forEach(btn => {
+      if (btn.dataset.bound === "1") return;
+      btn.dataset.bound = "1";
+
+      const num = btn.getAttribute("data-room");
+      btn.addEventListener("click", () => {
+        // Si existe ficha -> modal ficha, si no -> modal WIP (pero siempre acciona)
+        if (CATALOG && CATALOG[num]) {
+          openCatalogModal(num);
+        } else {
+          openWipModal(num);
+        }
+      });
+    });
+  }
+
+  async function loadCatalog(){
+    // Siempre: que al menos accione el click (aunque no exista JSON)
+    bindTileClicks();
+
+    for (const url of CATALOG_URLS){
+      try{
+        const res = await fetch(url, { cache:"no-store" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+
+        const data = await res.json();
+        if (!data || !Object.keys(data).length) continue;
+
+        CATALOG = data;
+        markTilesFromCatalog(); // aplica verde / gifs
+        return;
+      } catch (e){
+        // intentamos el siguiente URL
+        console.warn("Catálogo no cargado desde:", url, e);
+      }
+    }
+
+    // Si no cargó ningún JSON, dejamos la UI como está (pero los botones ya accionan WIP).
+    CATALOG = null;
+  }
+
+  // Modal listeners
+
+  (function initCatalogModal(){
+    const overlay = document.getElementById("catalogOverlay");
+    const closeBtn = document.getElementById("catalogClose");
+    if (!overlay || !closeBtn) return;
+
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) closeCatalogModal();
+    });
+    closeBtn.addEventListener("click", closeCatalogModal);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && overlay.style.display === "flex") closeCatalogModal();
+    });
+  })();
+  
+  (function initWipModal(){
+    const overlay = document.getElementById("wipOverlay");
+    const closeBtn = document.getElementById("wipClose");
+    if (!overlay || !closeBtn) return;
+
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) closeWipModal();
+    });
+    closeBtn.addEventListener("click", closeWipModal);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && overlay.style.display === "flex") closeWipModal();
+    });
+  })();
+
+
+  // Arranque
+  loadCatalog();
+
+</script>
+
+</div>
+</body>
+</html>
