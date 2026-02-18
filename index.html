@@ -225,7 +225,7 @@
 }
 .videoBtn:hover{border-color: rgba(110,231,255,.38);}
 .videoWrap{margin-top:12px; display:none;}
-.videoWrap video{width:100%; border-radius:16px; border:1px solid rgba(255,255,255,.10);}
+.videoWrap video{width:100%; height:min(42vh, 360px); object-fit:contain; display:block;}
 
 @media (max-width: 980px){
   .catalogBody{grid-template-columns: 1fr;}
@@ -1028,11 +1028,23 @@ footer{
   }
 
   function pickImages(room){
+    // Soporta 2 formatos:
+    // 1) { vistas: { izquierda, central/centro, derecha } }
+    // 2) { imagenes: [ {src, etiqueta}, ... ] }
+    const v = room?.vistas;
+    if (v && typeof v === "object"){
+      const left = v.izquierda || v.left;
+      const center = v.centro || v.central || v.center;
+      const right = v.derecha || v.right;
+      const ordered = [left, center, right].filter(Boolean);
+      if (ordered.length) return ordered.slice(0, 3);
+    }
+
     const imgs = Array.isArray(room?.imagenes) ? room.imagenes : [];
     const getBy = (key) => imgs.find(x => normalizeLabel(x?.etiqueta) === key && x?.src)?.src;
 
     const left = getBy("izquierda");
-    const center = getBy("centro");
+    const center = getBy("centro") || getBy("central");
     const right = getBy("derecha");
     const ordered = [left, center, right].filter(Boolean);
 
@@ -1041,6 +1053,7 @@ footer{
     }
     return ordered.slice(0, 3);
   }
+
 
   function openCatalogModal(roomNum){
     if (!CATALOG) return;
@@ -1096,9 +1109,16 @@ footer{
       videoBtn.style.display = "flex";
       videoWrap.style.display = "none";
       videoEl.src = vsrc;
+      // default: mute + loop (sin afectar el resto)
+      videoEl.muted = true;
+      videoEl.loop = true;
+      videoEl.playsInline = true;
+      try{ videoEl.load(); }catch(e){}
 
       videoBtn.onclick = () => {
         videoWrap.style.display = "block";
+        videoEl.muted = true;
+        videoEl.loop = true;
         try{ videoEl.play(); }catch(e){}
       };
     } else {
