@@ -11,4 +11,18 @@
         },
         "video": "https://res.cloudinary.com/dor6za85u/video/upload/v1771393259/WhatsApp_Video_2026-02-16_at_2.55.02_PM_jg9a33.mp4"
     }
+},
+
+    "4224": {
+        "torre": "Unique",
+        "piso": 2,
+        "tipo_cama": "Por definir",
+        "tipo_habitacion": "Por definir",
+        "vistas": {
+            "izquierda": "https://res.cloudinary.com/dor6za85u/image/upload/v1771392939/WhatsApp_Image_2026-02-17_at_4.24.35_PM_oyp4pi.jpg",
+            "central": "https://res.cloudinary.com/dor6za85u/image/upload/v1771392946/WhatsApp_Image_2026-02-17_at_4.24.36_PM_sgur2t.jpg",
+            "derecha": "https://res.cloudinary.com/dor6za85u/image/upload/v1771392952/WhatsApp_Image_2026-02-17_at_4.24.36_PM_1_nowntx.jpg"
+        },
+        "video": "https://res.cloudinary.com/dor6za85u/video/upload/v1771392960/WhatsApp_Video_2026-02-17_at_4.24.45_PM_lvhaxm.mp4"
+    }
 }
