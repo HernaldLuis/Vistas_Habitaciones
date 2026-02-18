@@ -1,0 +1,14 @@
+{
+    "2604": {
+        "torre": "Altitude",
+        "piso": 6,
+        "tipo_cama": "Por definir",
+        "tipo_habitacion": "Por definir",
+        "vistas": {
+            "izquierda": "https://res.cloudinary.com/dor6za85u/image/upload/v1771393224/WhatsApp_Image_2026-02-16_at_2.55.02_PM_jncovb.jpg",
+            "central": "https://res.cloudinary.com/dor6za85u/image/upload/v1771393251/WhatsApp_Image_2026-02-16_at_2.55.02_PM_2_msckrx.jpg",
+            "derecha": "https://res.cloudinary.com/dor6za85u/image/upload/v1771393244/WhatsApp_Image_2026-02-16_at_2.55.02_PM_1_mpctst.jpg"
+        },
+        "video": "https://res.cloudinary.com/dor6za85u/video/upload/v1771393259/WhatsApp_Video_2026-02-16_at_2.55.02_PM_jg9a33.mp4"
+    }
+}
