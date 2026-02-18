@@ -234,6 +234,33 @@
 }
 
 
+
+/* Video modal centrado */
+.videoOverlay{
+  position:fixed; inset:0; z-index:9999;
+  background:rgba(0,0,0,.62);
+  display:flex; align-items:center; justify-content:center;
+  padding:18px;
+  backdrop-filter: blur(10px) saturate(1.15);
+}
+.videoModal{
+  width:min(980px, 94vw);
+  max-height:88vh;
+  border-radius:22px;
+  overflow:hidden;
+  background:rgba(14,20,29,.96);
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow: 0 24px 70px rgba(0,0,0,.55);
+}
+#videoModalEl{
+  width:100%;
+  height:auto;
+  max-height:88vh;
+  display:block;
+  background:#0b1018;
+  object-fit: contain;
+}
+
 </style>
 
 
@@ -339,6 +366,33 @@
 footer{
   background: var(--glass-strong) !important;
 }
+
+/* Video modal centrado */
+.videoOverlay{
+  position:fixed; inset:0; z-index:9999;
+  background:rgba(0,0,0,.62);
+  display:flex; align-items:center; justify-content:center;
+  padding:18px;
+  backdrop-filter: blur(10px) saturate(1.15);
+}
+.videoModal{
+  width:min(980px, 94vw);
+  max-height:88vh;
+  border-radius:22px;
+  overflow:hidden;
+  background:rgba(14,20,29,.96);
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow: 0 24px 70px rgba(0,0,0,.55);
+}
+#videoModalEl{
+  width:100%;
+  height:auto;
+  max-height:88vh;
+  display:block;
+  background:#0b1018;
+  object-fit: contain;
+}
+
 </style>
 
 </head>
@@ -1116,10 +1170,10 @@ footer{
       try{ videoEl.load(); }catch(e){}
 
       videoBtn.onclick = () => {
-        videoWrap.style.display = "block";
-        videoEl.muted = true;
-        videoEl.loop = true;
-        try{ videoEl.play(); }catch(e){}
+        // abre en modal centrado
+        openVideoModal(videoEl.src);
+        // mantenemos wrap oculto para evitar scroll
+        videoWrap.style.display = \"none\";
       };
     } else {
       videoBtn.style.display = "none";
@@ -1138,6 +1192,35 @@ footer{
     overlay.setAttribute("aria-hidden","true");
     const videoEl = document.getElementById("cVideo");
     try{ videoEl.pause(); }catch(e){}
+
+  function openVideoModal(src){
+    const overlay = document.getElementById("videoOverlay");
+    const v = document.getElementById("videoModalEl");
+    if (!overlay || !v || !src) return;
+
+    v.src = src;
+    v.muted = true;
+    v.loop = true;
+    v.playsInline = true;
+
+    overlay.style.display = "flex";
+    overlay.setAttribute("aria-hidden","false");
+
+    try{ v.play(); }catch(e){}
+  }
+
+  function closeVideoModal(){
+    const overlay = document.getElementById("videoOverlay");
+    const v = document.getElementById("videoModalEl");
+    if (!overlay || !v) return;
+
+    try{ v.pause(); v.currentTime = 0; }catch(e){}
+    v.removeAttribute("src");
+    v.load();
+
+    overlay.style.display = "none";
+    overlay.setAttribute("aria-hidden","true");
+  }
   }
 
 
@@ -1274,8 +1357,25 @@ footer{
   // Arranque
   loadCatalog();
 
+
+  (function initVideoModal(){
+    const overlay = document.getElementById("videoOverlay");
+    if (!overlay) return;
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) closeVideoModal();
+    });
+  })();
+
 </script>
 
 </div>
+
+  <!-- Video Modal (solo cierra con click afuera) -->
+  <div id="videoOverlay" class="videoOverlay" aria-hidden="true" style="display:none;">
+    <div class="videoModal" role="dialog" aria-modal="true" aria-label="Video de la vista">
+      <video id="videoModalEl" controls playsinline></video>
+    </div>
+  </div>
+
 </body>
 </html>
