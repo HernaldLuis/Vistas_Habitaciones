@@ -12,6 +12,98 @@
         "video": "https://res.cloudinary.com/dor6za85u/video/upload/v1771393259/WhatsApp_Video_2026-02-16_at_2.55.02_PM_jg9a33.mp4"
     },
 
+    "4707": {
+    "torre": "Unique",
+    "piso": 7,
+    "tipo_cama": "Por definir",
+    "tipo_habitacion": "Por definir",
+    "vistas": {
+        "izquierda": "https://res.cloudinary.com/dor6za85u/image/upload/v1771509009/WhatsApp_Image_2026-02-18_at_10.13.39_AM_aerrp6.jpg",
+        "central": "https://res.cloudinary.com/dor6za85u/image/upload/v1771509016/WhatsApp_Image_2026-02-18_at_10.13.40_AM_zrw4tj.jpg",
+        "derecha": "https://res.cloudinary.com/dor6za85u/image/upload/v1771509019/WhatsApp_Image_2026-02-18_at_10.13.59_AM_yuaegt.jpg"
+    },
+    "video": "https://res.cloudinary.com/dor6za85u/video/upload/v1771509028/WhatsApp_Video_2026-02-18_at_10.13.58_AM_zieezt.mp4"
+},
+
+"4508": {
+    "torre": "Unique",
+    "piso": 5,
+    "tipo_cama": "Por definir",
+    "tipo_habitacion": "Por definir",
+    "vistas": {
+        "izquierda": "https://res.cloudinary.com/dor6za85u/image/upload/v1771509404/WhatsApp_Image_2026-02-18_at_10.28.18_AM_pg45l6.jpg",
+        "central": "https://res.cloudinary.com/dor6za85u/image/upload/v1771509409/WhatsApp_Image_2026-02-18_at_10.28.18_AM_1_keadhw.jpg",
+        "derecha": "https://res.cloudinary.com/dor6za85u/image/upload/v1771509397/WhatsApp_Image_2026-02-18_at_10.28.17_AM_cgitqy.jpg"
+    },
+    "video": "https://res.cloudinary.com/dor6za85u/video/upload/v1771509415/WhatsApp_Video_2026-02-18_at_10.28.17_AM_jkepbm.mp4"
+},
+
+"4515": {
+    "torre": "Unique",
+    "piso": 5,
+    "tipo_cama": "Por definir",
+    "tipo_habitacion": "Por definir",
+    "vistas": {
+        "izquierda": "https://res.cloudinary.com/dor6za85u/image/upload/v1771509660/WhatsApp_Image_2026-02-18_at_10.53.07_AM_2_hskca4.jpg",
+        "central": "https://res.cloudinary.com/dor6za85u/image/upload/v1771509654/WhatsApp_Image_2026-02-18_at_10.53.07_AM_1_uk3uy7.jpg",
+        "derecha": "https://res.cloudinary.com/dor6za85u/image/upload/v1771509646/WhatsApp_Image_2026-02-18_at_10.53.07_AM_ljvm30.jpg"
+    },
+    "video": "https://res.cloudinary.com/dor6za85u/video/upload/v1771509670/WhatsApp_Video_2026-02-18_at_10.53.07_AM_uhijlv.mp4"
+},
+
+"4516": {
+    "torre": "Unique",
+    "piso": 5,
+    "tipo_cama": "Por definir",
+    "tipo_habitacion": "Por definir",
+    "vistas": {
+        "izquierda": "https://res.cloudinary.com/dor6za85u/image/upload/v1771509856/WhatsApp_Image_2026-02-18_at_10.53.08_AM_ruhjyn.jpg",
+        "central": "https://res.cloudinary.com/dor6za85u/image/upload/v1771509851/WhatsApp_Image_2026-02-18_at_10.53.07_AM_1_pf2tda.jpg",
+        "derecha": "https://res.cloudinary.com/dor6za85u/image/upload/v1771509845/WhatsApp_Image_2026-02-18_at_10.53.07_AM_z3satx.jpg"
+    },
+    "video": "https://res.cloudinary.com/dor6za85u/video/upload/v1771509860/WhatsApp_Video_2026-02-18_at_10.53.18_AM_fotdcu.mp4"
+},
+
+"4403": {
+    "torre": "Unique",
+    "piso": 4,
+    "tipo_cama": "Por definir",
+    "tipo_habitacion": "Por definir",
+    "vistas": {
+        "izquierda": "https://res.cloudinary.com/dor6za85u/image/upload/v1771510047/WhatsApp_Image_2026-02-17_at_4.08.30_PM_kd3eui.jpg",
+        "central": "https://res.cloudinary.com/dor6za85u/image/upload/v1771510055/WhatsApp_Image_2026-02-17_at_4.08.30_PM_1_l7qbt2.jpg",
+        "derecha": "https://res.cloudinary.com/dor6za85u/image/upload/v1771510038/WhatsApp_Image_2026-02-17_at_4.08.21_PM_vrwlui.jpg"
+    },
+    "video": "https://res.cloudinary.com/dor6za85u/video/upload/v1771510070/WhatsApp_Video_2026-02-17_at_4.08.30_PM_vs9itm.mp4"
+},
+
+"2710": {
+    "torre": "Altitude",
+    "piso": 7,
+    "tipo_cama": "Por definir",
+    "tipo_habitacion": "Por definir",
+    "vistas": {
+        "izquierda": "https://res.cloudinary.com/dor6za85u/image/upload/v1771510324/WhatsApp_Image_2026-02-16_at_1.26.08_PM_1_l2ixfp.jpg",
+        "central": "https://res.cloudinary.com/dor6za85u/image/upload/v1771510315/WhatsApp_Image_2026-02-16_at_1.26.08_PM_a9wij0.jpg",
+        "derecha": "https://res.cloudinary.com/dor6za85u/image/upload/v1771510306/WhatsApp_Image_2026-02-16_at_1.26.07_PM_cs8xsy.jpg"
+    },
+    "video": "https://res.cloudinary.com/dor6za85u/video/upload/v1771510342/WhatsApp_Video_2026-02-16_at_1.26.18_PM_lo9uij.mp4"
+},
+
+"2201": {
+    "torre": "Altitude",
+    "piso": 2,
+    "tipo_cama": "Por definir",
+    "tipo_habitacion": "Por definir",
+    "vistas": {
+        "izquierda": "https://res.cloudinary.com/dor6za85u/image/upload/v1771511036/WhatsApp_Image_2026-02-16_at_12.32.07_PM_2_yvjiv8.jpg",
+        "central": "https://res.cloudinary.com/dor6za85u/image/upload/v1771511027/WhatsApp_Image_2026-02-16_at_12.32.07_PM_1_mhygci.jpg",
+        "derecha": "https://res.cloudinary.com/dor6za85u/image/upload/v1771511031/WhatsApp_Image_2026-02-16_at_12.32.07_PM_3_fi0srd.jpg"
+    },
+    "video": "https://res.cloudinary.com/dor6za85u/video/upload/v1771511048/WhatsApp_Video_2026-02-16_at_12.32.19_PM_b9em5o.mp4"
+},
+
+
     "4224": {
         "torre": "Unique",
         "piso": 2,
