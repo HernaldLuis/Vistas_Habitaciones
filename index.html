@@ -1172,19 +1172,15 @@ footer{
     if (vsrc){
       videoBtn.style.display = "flex";
       videoWrap.style.display = "none";
-      videoEl.src = vsrc;
+      videoEl.removeAttribute("src");
+      try{ videoEl.load(); }catch(e){}
       // default: mute + loop (sin afectar el resto)
       videoEl.muted = true;
       videoEl.loop = true;
       videoEl.playsInline = true;
       try{ videoEl.load(); }catch(e){}
 
-      videoBtn.onclick = () => {
-        videoWrap.style.display = "block";
-        videoEl.muted = true;
-        videoEl.loop = true;
-        try{ videoEl.play(); }catch(e){}
-      };
+      videoBtn.onclick = () => { openVideoModal(vsrc); };
     } else {
       videoBtn.style.display = "none";
       videoWrap.style.display = "none";
