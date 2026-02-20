@@ -1168,6 +1168,28 @@ body{
 }
 </style>
 
+
+<style>
+/* =======================================
+   ELIMINAR GIF / LOADING DOT DEFAULT
+   - Sin leyendas
+   - Sin gif
+   - Solo verde (loaded) o default limpio
+   SAFE · SOLO CSS
+   ======================================= */
+
+/* Oculta cualquier loadingDot o gif */
+.tile.pending .loadingDot,
+.tile.pending .loadingDot img{
+  display:none !important;
+}
+
+/* Quita cualquier espacio residual */
+.tile.pending{
+  background-image:none !important;
+}
+</style>
+
 </head>
 <body>
 <div class="bg-stage">
