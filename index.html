@@ -405,6 +405,769 @@ footer{
 
 </style>
 
+
+<style>
+/* === TORRES EN HORIZONTAL · SAFE MODE (no JS altered) === */
+.leftScroll{
+  display:flex !important;
+  gap:20px;
+  overflow-x:auto !important;
+  overflow-y:hidden !important;
+  align-items:flex-start;
+  scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.leftScroll .towerBlock{
+  flex:0 0 min(520px, 92vw);
+  scroll-snap-align:start;
+}
+
+.leftScroll .towerSep{
+  display:none !important;
+}
+</style>
+
+
+<style>
+/* ===============================
+   AJUSTES PRO · Fondo visible + UI compacta
+   (SAFE: solo CSS, no toca JS)
+   =============================== */
+
+/* 1) Fondo con imagen (se ve "tantito")
+   Cambia la URL cuando quieras por tu imagen favorita */
+:root{
+  --bgimg: url("https://res.cloudinary.com/dor6za85u/image/upload/v1765651460/Krystal_Grand_wo1rbs.jpg");
+}
+
+/* Capa de imagen detrás (muy sutil) */
+.bg-stage::before{
+  background:
+    var(--bgimg) center/cover no-repeat,
+    radial-gradient(1200px 900px at 50% 35%, rgba(110,231,255,.10), transparent 55%),
+    radial-gradient(1200px 900px at 85% 15%, rgba(139,92,246,.08), transparent 58%),
+    radial-gradient(1000px 800px at 15% 85%, rgba(44,255,154,.06), transparent 58%),
+    radial-gradient(1300px 900px at 50% 55%, transparent 35%, rgba(0,0,0,.62) 85%);
+  opacity: .18;  /* “se ve tantito” */
+  filter: blur(0px) saturate(1.05) contrast(1.05);
+}
+
+/* 2) Contenedores semi-transparentes (para que el fondo se asome) */
+.grid{
+  background: rgba(18,26,34,.52) !important;
+  backdrop-filter: blur(14px);
+}
+.leftScroll{
+  padding: 10px !important;
+}
+.towerBlock{
+  background: rgba(16,24,34,.45) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  backdrop-filter: blur(14px);
+}
+.floor{
+  background: rgba(11,17,25,.42) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  backdrop-filter: blur(12px);
+}
+
+/* 3) Unidades más pequeñas (sin perder estética) */
+.floorHead b{ font-size:12px !important; }
+.floorHead .muted{ font-size:11px !important; }
+
+.floorRow{
+  gap:6px !important;
+  grid-template-columns: repeat(auto-fit, minmax(64px, 1fr)) !important;
+}
+.tile{
+  padding: 8px 6px !important;
+  border-radius: 11px !important;
+}
+.numText{
+  font-size: 13px !important;
+}
+
+/* 4) Dentro de cada torre: TODOS los pisos en una sola fila (27,26,25...)
+   - No se apilan
+   - Si se hace largo, se puede scrollear horizontal dentro de la torre
+*/
+.towerBlock{
+  display:flex;
+  flex-direction:column;
+}
+/* convertimos la "lista" de floors en una banda horizontal */
+.towerBlock .divider + .floor,
+.towerBlock .floor{
+  /* no tocar el contenido interno; solo comportamiento de caja */
+}
+
+/* Contenedor horizontal de pisos:
+   inyectamos comportamiento usando :has cuando existe (Chrome/Edge modernos),
+   y fallback usando un wrapper virtual con display: contents + flex en towerBlock */
+@supports(selector(:has(*))){
+  .towerBlock:has(.floor) .divider{
+    margin-bottom: 10px !important;
+  }
+  .towerBlock:has(.floor){
+    /* mantiene column, pero creamos un "flow" horizontal para floors */
+  }
+  .towerBlock:has(.floor) .floor{
+    margin-bottom: 0 !important;
+  }
+  .towerBlock:has(.floor){
+    position: relative;
+  }
+  .towerBlock:has(.floor) .floor{
+    flex: 0 0 auto;
+    width: min(480px, 86vw);
+  }
+  /* aquí está la magia: hacemos que los floors se comporten como fila usando flex-wrap controlado */
+  .towerBlock:has(.floor){
+    --floors-gap: 12px;
+  }
+  .towerBlock:has(.floor) .divider{
+    /* no cambia */
+  }
+  /* ponemos a los floors en una fila usando una "hack" segura: grid auto-flow */
+  .towerBlock:has(.floor){
+    display: grid;
+    grid-template-rows: auto auto;
+    grid-template-columns: 1fr;
+  }
+  .towerBlock:has(.floor) .divider{
+    grid-row: 2;
+    grid-column: 1;
+  }
+  /* reordenamos: título+muted+divider quedan arriba, floors en carrusel abajo */
+  .towerBlock:has(.floor) .towerTitle,
+  .towerBlock:has(.floor) .muted,
+  .towerBlock:has(.floor) .divider{
+    grid-column: 1;
+  }
+  .towerBlock:has(.floor) .towerTitle{ grid-row: 1; }
+  .towerBlock:has(.floor) .muted{ grid-row: 1; margin-top: 2px; }
+  .towerBlock:has(.floor) .divider{ grid-row: 1; margin-top: 10px; }
+
+  /* Floors row: usamos display:flex en un pseudo-contenedor creado con ::after no sirve,
+     así que aplicamos a towerBlock que actúe como contenedor scroll, y cada floor se alineará inline con grid-auto-flow */
+  .towerBlock:has(.floor){
+    grid-template-rows: auto auto;
+  }
+  .towerBlock:has(.floor){
+    /* layer for floors row */
+  }
+  .towerBlock:has(.floor) .floor{
+    grid-row: 2;
+    grid-column: 1;
+  }
+  /* Convertimos el área de floors en un carrusel con CSS grid auto-flow */
+  .towerBlock:has(.floor){
+    /* nada extra */
+  }
+  .towerBlock:has(.floor) .floor{
+    /* se apilan por default; lo arreglamos: */
+  }
+  .towerBlock:has(.floor){
+    /* hacemos que el contenedor real de floors sea un "flow" horizontal: */
+  }
+  .towerBlock:has(.floor){
+    /* fallback a no-:has abajo */
+  }
+}
+
+/* Fallback universal (sin :has): aplica igual pero sin reordenar header.
+   Floors en fila dentro de la torre usando scroll horizontal */
+.towerBlock{
+  /* dejamos header normal */
+}
+.towerBlock .floor{
+  width: min(480px, 86vw);
+}
+/* Creamos la fila horizontal de floors SIN envolver HTML:
+   usamos flex en towerBlock y separamos header con width:100% */
+.towerBlock{
+  display:flex !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+}
+.towerBlock .towerTitle,
+.towerBlock .muted,
+.towerBlock .divider{
+  flex: 0 0 100% !important;
+}
+.towerBlock .floor{
+  flex: 0 0 auto !important;
+  margin-bottom: 0 !important;
+}
+
+/* Si se hace muy largo, el scroll horizontal ya lo tienes en .leftScroll (torres),
+   pero aquí damos un poco más de aire para que se vea pro */
+@media (max-width: 980px){
+  .towerBlock .floor{ width: min(440px, 92vw); }
+  .floorRow{ grid-template-columns: repeat(auto-fit, minmax(62px, 1fr)) !important; }
+}
+</style>
+
+
+<style>
+/* =======================================
+   ULTRA GLASS + PISOS EN UNA SOLA LÍNEA
+   (SAFE MODE · SOLO CSS)
+   ======================================= */
+
+/* Más transparente */
+.grid{
+  background: rgba(18,26,34,.35) !important;
+}
+.towerBlock{
+  background: rgba(16,24,34,.30) !important;
+}
+.floor{
+  background: rgba(11,17,25,.28) !important;
+}
+
+/* PISOS EN UNA SOLA LÍNEA (27 completo en fila, etc) */
+.floorRow{
+  display:flex !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  gap:6px !important;
+  padding-bottom:6px;
+}
+
+/* Botones ligeramente más compactos */
+.tile{
+  min-width:60px !important;
+  padding:6px 6px !important;
+}
+.numText{
+  font-size:12px !important;
+}
+
+/* Scroll horizontal más limpio */
+.floorRow::-webkit-scrollbar{
+  height:6px;
+}
+.floorRow::-webkit-scrollbar-thumb{
+  background: rgba(255,255,255,.18);
+  border-radius:10px;
+}
+.floorRow::-webkit-scrollbar-track{
+  background: transparent;
+}
+</style>
+
+
+<style>
+/* =======================================
+   MOSTRAR TODO (SIN SCROLL HORIZONTAL)
+   + Compacto sin que se toquen
+   (SAFE MODE · SOLO CSS)
+   ======================================= */
+
+/* Cada piso muestra TODOS sus botones sin scroll */
+.floorRow{
+  display:flex !important;
+  flex-wrap: wrap !important;
+  overflow: visible !important;
+  gap: 6px !important;           /* evita que se rocen */
+  row-gap: 6px !important;
+  padding-bottom: 0 !important;
+}
+
+/* Unidades un poco más compactas, pero con aire */
+.tile{
+  min-width: 58px !important;
+  padding: 6px 6px !important;
+  border-radius: 11px !important;
+}
+
+/* Si hay sufijos A/B, damos un pelín más de ancho para que no se corte */
+.tile .numText{
+  max-width: 100% !important;
+  font-size: 12px !important;
+}
+
+/* En pantallas grandes, permite meter más botones por fila */
+@media (min-width: 1200px){
+  .tile{ min-width: 54px !important; }
+}
+
+/* En pantallas pequeñas, se mantiene legible y sin que se peguen */
+@media (max-width: 520px){
+  .tile{ min-width: 62px !important; }
+}
+</style>
+
+
+<style>
+/* =======================================
+   FIX: EVITAR ENCIMADOS (GRID RESPONSIVE)
+   Muestra TODO sin scroll, sin roces
+   (SAFE MODE · SOLO CSS)
+   ======================================= */
+
+/* Fuerza layout tipo GRID (más estable que flex-wrap en tu base) */
+.floor .floorRow{
+  display:grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(58px, 1fr)) !important;
+  gap: 6px !important;
+  overflow: visible !important;
+  padding-bottom: 0 !important;
+}
+
+/* Cada botón se adapta a la celda, sin encimar */
+.floor .floorRow > .tile{
+  width: auto !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+
+/* Tamaño compacto sin perder legibilidad */
+.floor .tile{
+  padding: 7px 6px !important;
+  border-radius: 12px !important;
+}
+.floor .numText{
+  font-size: 12px !important;
+}
+
+/* En pantallas muy anchas, caben más por fila */
+@media (min-width: 1400px){
+  .floor .floorRow{
+    grid-template-columns: repeat(auto-fit, minmax(54px, 1fr)) !important;
+  }
+}
+</style>
+
+
+<style>
+/* =======================================
+   FIX 2: POR TORRE "SE SIGUE DE LARGO"
+   - Pisos apilados (vertical) dentro de cada torre
+   - Habitaciones en una sola línea (sin encimar)
+   - Puede scrollear horizontal por piso si es largo
+   (SAFE MODE · SOLO CSS)
+   ======================================= */
+
+/* Asegura que dentro de cada torre los pisos sean VERTICALES (no en fila) */
+.towerBlock{
+  display:block !important;      /* mata cualquier flex-wrap previo */
+}
+.towerBlock .towerTitle,
+.towerBlock .muted,
+.towerBlock .divider{
+  display:block !important;
+  width:100% !important;
+}
+.towerBlock .floor{
+  display:block !important;
+  width:100% !important;
+  margin-bottom: 10px !important;
+}
+
+/* Cada piso: habitaciones en UNA SOLA LÍNEA (sin wrap) */
+.floor .floorRow{
+  display:flex !important;
+  flex-wrap: nowrap !important;
+  gap: 6px !important;
+  overflow-x: auto !important;   /* si se hace largo, aquí se mueve */
+  overflow-y: hidden !important;
+  padding-bottom: 6px !important;
+}
+
+/* Cada botón no se encoge ni se pega */
+.floor .floorRow > .tile{
+  flex: 0 0 auto !important;
+  min-width: 62px !important;
+  margin: 0 !important;
+}
+
+/* Compacto, pero legible */
+.floor .tile{
+  padding: 7px 6px !important;
+  border-radius: 12px !important;
+}
+.floor .numText{
+  font-size: 12px !important;
+}
+
+/* Scrollbar discreto */
+.floor .floorRow::-webkit-scrollbar{ height: 6px; }
+.floor .floorRow::-webkit-scrollbar-thumb{
+  background: rgba(255,255,255,.18);
+  border-radius: 10px;
+}
+.floor .floorRow::-webkit-scrollbar-track{ background: transparent; }
+
+/* Evita que algo "corte" el contenido */
+.floor{ overflow: visible !important; }
+
+</style>
+
+
+<style>
+/* =======================================
+   MOSTRAR TORRES COMPLETAS (PIE A CABEZA)
+   - SIN scroll vertical interno
+   - SOLO scroll horizontal para mover torres
+   (SAFE MODE · SOLO CSS)
+   ======================================= */
+
+/* Quita el "panel" con altura fija que cortaba las torres */
+.leftScroll{
+  height: auto !important;          /* antes: calc(100vh - 86px) */
+  max-height: none !important;
+  overflow-y: visible !important;   /* NO scroll vertical interno */
+  overflow-x: auto !important;      /* SOLO lateral para torres */
+  padding-bottom: 18px !important;  /* aire al final */
+}
+
+/* Asegura que el contenedor no recorte */
+.grid{
+  overflow: visible !important;
+}
+
+/* Mantén las torres en horizontal (izq→der) */
+.leftScroll{
+  display:flex !important;
+  align-items:flex-start !important;
+  gap:20px !important;
+  scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.leftScroll .towerBlock{
+  flex:0 0 min(520px, 92vw);
+  scroll-snap-align:start;
+}
+
+/* Importante: la página sí puede bajar para ver pisos 2/1 */
+body{
+  overflow-y: auto !important;
+}
+</style>
+
+
+<style>
+/* =======================================
+   ALINEAR TORRES POR LA BASE (MISMO NIVEL ABAJO)
+   - Altitude (21), Palmilla (11), Unique (41) quedan alineados en la parte inferior
+   - Palmilla NO se estira: solo "baja" visualmente por tener menos pisos
+   (SAFE MODE · SOLO CSS)
+   ======================================= */
+
+/* En el carrusel horizontal de torres, alineamos por abajo */
+.leftScroll{
+  align-items:flex-end !important;
+}
+
+/* Por si algún contenedor tuviera altura fija, la liberamos */
+.leftScroll .towerBlock{
+  height:auto !important;
+}
+</style>
+
+
+<style>
+/* =======================================
+   ULTRA GLASS MODE 🔥
+   Más transparencia sin perder elegancia
+   (SAFE MODE · SOLO CSS)
+   ======================================= */
+
+/* Contenedor general */
+.grid{
+  background: rgba(18,26,34,.22) !important;
+  backdrop-filter: blur(16px) !important;
+}
+
+/* Torres */
+.towerBlock{
+  background: rgba(16,24,34,.18) !important;
+  backdrop-filter: blur(18px) !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+}
+
+/* Pisos */
+.floor{
+  background: rgba(11,17,25,.15) !important;
+  backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+}
+
+/* Header superior ligeramente más glass */
+header{
+  background: rgba(11,15,20,.55) !important;
+  backdrop-filter: blur(18px) !important;
+}
+
+/* Footer también más ligero */
+footer{
+  background: rgba(15,22,32,.40) !important;
+  backdrop-filter: blur(14px) !important;
+}
+
+</style>
+
+
+<style>
+/* =======================================
+   EXTREME GLASS MODE 💎
+   Transparencia máxima elegante
+   (SAFE · SOLO CSS)
+   ======================================= */
+
+/* Contenedor general casi cristal */
+.grid{
+  background: rgba(18,26,34,.12) !important;
+  backdrop-filter: blur(20px) !important;
+}
+
+/* Torres ultra transparentes */
+.towerBlock{
+  background: rgba(16,24,34,.10) !important;
+  backdrop-filter: blur(22px) !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+}
+
+/* Pisos casi flotando */
+.floor{
+  background: rgba(11,17,25,.08) !important;
+  backdrop-filter: blur(18px) !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+}
+
+/* Header casi flotante */
+header{
+  background: rgba(11,15,20,.35) !important;
+  backdrop-filter: blur(22px) !important;
+}
+
+/* Footer ligero */
+footer{
+  background: rgba(15,22,32,.25) !important;
+  backdrop-filter: blur(16px) !important;
+}
+
+</style>
+
+
+<style>
+/* =======================================
+   FULL TRANSPARENT MODE 🚀
+   TODO cristal, casi flotando
+   (SAFE · SOLO CSS)
+   ======================================= */
+
+/* Contenedor principal */
+.grid{
+  background: rgba(18,26,34,.05) !important;
+  backdrop-filter: blur(24px) !important;
+}
+
+/* Torres completamente glass */
+.towerBlock{
+  background: rgba(16,24,34,.04) !important;
+  backdrop-filter: blur(26px) !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+}
+
+/* Pisos ultra flotantes */
+.floor{
+  background: rgba(11,17,25,.03) !important;
+  backdrop-filter: blur(22px) !important;
+  border: 1px solid rgba(255,255,255,.15) !important;
+}
+
+/* Header casi invisible */
+header{
+  background: rgba(11,15,20,.20) !important;
+  backdrop-filter: blur(26px) !important;
+}
+
+/* Footer flotante */
+footer{
+  background: rgba(15,22,32,.18) !important;
+  backdrop-filter: blur(20px) !important;
+}
+
+/* Ajuste ligero de texto para mantener legibilidad */
+body{
+  color: rgba(255,255,255,.92) !important;
+}
+
+</style>
+
+
+<style>
+/* =======================================
+   ELIMINAR CONTENEDOR GENERAL DE TORRES
+   (mantener towerBlock intacto)
+   SAFE · SOLO CSS
+   ======================================= */
+
+/* Quita visualmente el contenedor grande (.grid) */
+.grid{
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  padding: 0 !important;
+}
+
+/* Quita cualquier límite visual del scroll wrapper */
+.leftScroll{
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding-top: 10px !important;
+}
+
+</style>
+
+
+<style>
+/* =======================================
+   NUEVO FONDO LIMPIO
+   Se elimina sistema anterior (gradientes, watermark)
+   y se aplica imagen panorámica nocturna
+   ======================================= */
+
+/* Quitar cualquier fondo anterior */
+body::before,
+body::after,
+.bg-stage,
+.bg-watermark{
+  display:none !important;
+  content:none !important;
+  background:none !important;
+}
+
+/* Fondo principal */
+body{
+  background: url("https://res.cloudinary.com/dor6za85u/image/upload/v1771564589/RKGLC-Panoramic-Night_etfdme.jpg") center center / cover no-repeat fixed !important;
+  background-color:#000 !important;
+}
+
+/* Ajuste para que las torres resalten un poco */
+.towerBlock{
+  backdrop-filter: blur(18px) saturate(1.1) !important;
+}
+
+</style>
+
+
+<style>
+/* =======================================
+   ULTRA TRANSPARENCIA FINAL 🌌
+   Torres casi invisibles para lucir fondo
+   SAFE · SOLO CSS
+   ======================================= */
+
+/* Torres casi cristal */
+.towerBlock{
+  background: rgba(0,0,0,.06) !important;
+  backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(255,255,255,.20) !important;
+  box-shadow: none !important;
+}
+
+/* Pisos prácticamente flotando */
+.floor{
+  background: rgba(0,0,0,.04) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255,255,255,.15) !important;
+}
+
+/* Quitar cualquier fondo residual */
+.grid,
+.leftScroll{
+  background: transparent !important;
+}
+
+/* Texto un poco más brillante para contraste */
+body{
+  color: rgba(255,255,255,.96) !important;
+}
+
+</style>
+
+
+<style>
+/* =======================================
+   TOTALMENTE TRANSPARENTE 🔥
+   Sin fondo, sin blur, solo estructura
+   SAFE · SOLO CSS
+   ======================================= */
+
+/* Torres completamente transparentes */
+.towerBlock{
+  background: transparent !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  border: 1px solid rgba(255,255,255,.25) !important;
+}
+
+/* Pisos completamente transparentes */
+.floor{
+  background: transparent !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  border: 1px solid rgba(255,255,255,.20) !important;
+}
+
+/* Elimina cualquier residuo visual */
+.grid,
+.leftScroll{
+  background: transparent !important;
+  backdrop-filter: none !important;
+}
+
+/* Mantener texto visible */
+body{
+  color: rgba(255,255,255,.98) !important;
+}
+
+</style>
+
+
+<style>
+/* =======================================
+   SOFT MICRO-GLASS ✨
+   Apenas perceptible, elegante
+   SAFE · SOLO CSS
+   ======================================= */
+
+/* Torres con glass MUY ligero */
+.towerBlock{
+  background: rgba(255,255,255,.04) !important;
+  backdrop-filter: blur(6px) !important;
+  border: 1px solid rgba(255,255,255,.25) !important;
+}
+
+/* Pisos con micro glass */
+.floor{
+  background: rgba(255,255,255,.03) !important;
+  backdrop-filter: blur(4px) !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+}
+
+/* Nada más */
+</style>
+
+
+<style>
+/* =======================================
+   OCULTAR LEYENDA "FICHA" (okMark)
+   Mantener solo el color verde de cargada
+   SAFE · SOLO CSS
+   ======================================= */
+.tile.loaded .okMark{
+  display:none !important;
+}
+</style>
+
 </head>
 <body>
 <div class="bg-stage">
